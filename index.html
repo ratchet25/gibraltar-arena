@@ -17,11 +17,14 @@
     button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
     button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
     #status { margin: 15px 0; padding: 12px; background: #010409; border-radius: 6px; font-size: 0.9em; border-left: 4px solid var(--blue-accent); }
-    .pvp-room { background: #21262d; margin: 12px 0; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #30363d; }
+    .pvp-room { background: #21262d; margin: 12px 0; padding: 15px; border-radius: 8px; flex-direction: column; display: flex; gap: 10px; border: 1px solid #30363d; }
+    .pvp-slots { display: flex; align-items: center; gap: 15px; }
     .pvp-player { flex: 1; padding: 12px; background: #0d1117; border-radius: 4px; text-align: center; border: 1px solid #30363d; cursor: pointer; font-weight: bold; }
     .pvp-player.waiting { color: #484f58; border: 1px dashed #484f58; font-weight: normal; }
     .vs-label { font-weight: bold; color: var(--red-btn); }
-    .leave-btn { width: auto; padding: 8px 15px; background: var(--red-btn); margin: 0; }
+    .start-btn { background: var(--blue-accent); color: #000; }
+    .leave-btn { background: var(--red-btn); }
+    .room-status { font-size: 0.8em; text-align: center; color: var(--epl-gold); }
   </style>
 </head>
 <body>
@@ -83,16 +86,29 @@
         div.className = 'pvp-room';
         const p1 = room.p1 || 'EMPTY';
         const p2 = room.p2 || 'EMPTY';
+        const isFull = (p1 !== 'EMPTY' && p2 !== 'EMPTY');
+        const isInBattle = room.status === 'BATTLE';
         
         div.innerHTML = `
-          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p1')">${p1}</div>
-          <div class="vs-label">VS</div>
-          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p2')">${p2}</div>
-          ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="destroyRoom('${id}')">Exit</button>` : ''}
+          <div class="room-status">${isInBattle ? "🔥 BATTLE IN PROGRESS" : "⏳ WAITING..."}</div>
+          <div class="pvp-slots">
+            <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="!isInBattle && joinSlot('${id}', 'p1')">${p1}</div>
+            <div class="vs-label">VS</div>
+            <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="!isInBattle && joinSlot('${id}', 'p2')">${p2}</div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            ${(isFull && !isInBattle && (p1 === nick || p2 === nick)) ? `<button class="start-btn" onclick="startBattle('${id}')">START BATTLE</button>` : ''}
+            ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="destroyRoom('${id}')">EXIT</button>` : ''}
+          </div>
         `;
         container.appendChild(div);
       });
     });
+
+    // 배틀 시작 함수
+    window.startBattle = (roomId) => {
+      db.ref('rooms/' + roomId).update({ status: 'BATTLE' });
+    };
 
     document.getElementById('registerBtn').onclick = () => {
       const val = document.getElementById('avatarId').value.trim();
@@ -105,9 +121,8 @@
       const nick = getNick();
       if (!nick) return alert("Register first");
       const roomId = "room_" + Date.now();
-      db.ref('rooms/' + roomId).set({ p1: nick, p2: 'EMPTY' })
-        .then(() => localStorage.setItem('my_room_id', roomId))
-        .catch(e => alert("Error: " + e.message));
+      db.ref('rooms/' + roomId).set({ p1: nick, p2: 'EMPTY', status: 'WAITING' })
+        .then(() => localStorage.setItem('my_room_id', roomId));
     };
 
     window.joinSlot = (roomId, slot) => {
@@ -115,7 +130,7 @@
       if (!nick) return alert("Register first");
       db.ref('rooms/' + roomId).once('value', (snap) => {
         const room = snap.val();
-        if (!room) return;
+        if (!room || room.status === 'BATTLE') return;
         if (room[slot] !== 'EMPTY' && room[slot] !== nick) return alert("Slot taken");
         
         let updates = {};
@@ -126,38 +141,24 @@
       });
     };
 
-    // 개선된 퇴장 로직: 혼자 있으면 삭제, 둘이 있으면 자리만 비움
     window.destroyRoom = (roomId) => {
       const nick = getNick();
-      if (!nick) return;
-
       db.ref('rooms/' + roomId).once('value', (snap) => {
         const room = snap.val();
         if (!room) return;
-
-        const isP1 = room.p1 === nick;
-        const isP2 = room.p2 === nick;
-        const otherPlayer = isP1 ? room.p2 : room.p1;
-
-        // 상대방이 없거나 EMPTY면 방 폭파
+        const otherPlayer = (room.p1 === nick) ? room.p2 : room.p1;
         if (!otherPlayer || otherPlayer === 'EMPTY') {
-          db.ref('rooms/' + roomId).remove().then(() => {
-            localStorage.removeItem('my_room_id');
-          });
+          db.ref('rooms/' + roomId).remove().then(() => localStorage.removeItem('my_room_id'));
         } else {
-          // 상대방이 있으면 내 자리만 비움
-          let updates = {};
-          if (isP1) updates['p1'] = 'EMPTY';
-          if (isP2) updates['p2'] = 'EMPTY';
-          db.ref('rooms/' + roomId).update(updates).then(() => {
-            localStorage.removeItem('my_room_id');
-          });
+          let updates = { status: 'WAITING' }; // 한 명 나가면 대기 상태로 복구
+          if (room.p1 === nick) updates['p1'] = 'EMPTY';
+          if (room.p2 === nick) updates['p2'] = 'EMPTY';
+          db.ref('rooms/' + roomId).update(updates).then(() => localStorage.removeItem('my_room_id'));
         }
       });
     };
 
   } catch (e) {
-    document.getElementById('status').textContent = "Setup Error: " + e.message;
     console.error(e);
   }
 </script>
