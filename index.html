@@ -2,29 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gibraltar Arena | EPL LIVE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Gibraltar Arena | LIVE</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <style>
-    :root { --bg-dark: #0d1117; --bg-panel: #161b22; --blue-accent: #58a6ff; --green-btn: #238636; --red-btn: #da3633; --text-gray: #8b949e; --epl-gold: #f0883e; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 20px; }
-    .container { max-width: 750px; margin: auto; background: var(--bg-panel); padding: 30px; border-radius: 12px; border: 1px solid #30363d; }
-    header { text-align: center; margin-bottom: 25px; }
-    h1 { color: var(--blue-accent); margin-bottom: 5px; text-transform: uppercase; }
-    .location-tag { color: var(--epl-gold); font-weight: bold; border: 2px solid var(--epl-gold); display: inline-block; padding: 4px 25px; border-radius: 20px; }
-    input, button { padding: 12px; margin: 10px 0; font-size: 15px; width: 100%; border-radius: 6px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; }
-    button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
+    :root { 
+      --bg-dark: #0d1117; --bg-panel: #161b22; --blue-accent: #58a6ff; 
+      --green-btn: #238636; --red-btn: #da3633; --text-gray: #8b949e; --epl-gold: #f0883e; 
+    }
+    /* 모바일 터치 최적화 */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 15px; margin: 0; }
+    .container { max-width: 600px; margin: auto; background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    header { text-align: center; margin-bottom: 20px; }
+    h1 { color: var(--blue-accent); margin: 0; font-size: 1.5rem; text-transform: uppercase; }
+    .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); display: inline-block; padding: 2px 15px; border-radius: 20px; margin-top: 5px; }
+    
+    /* 입력 및 버튼 UI */
+    input, button { padding: 14px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; }
+    button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; transition: filter 0.2s; }
+    button:active { filter: brightness(1.2); }
     button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-    #status { margin: 15px 0; padding: 12px; background: #010409; border-radius: 6px; font-size: 0.9em; border-left: 4px solid var(--blue-accent); }
-    .pvp-room { background: #21262d; margin: 12px 0; padding: 15px; border-radius: 8px; flex-direction: column; display: flex; gap: 10px; border: 1px solid #30363d; }
-    .pvp-slots { display: flex; align-items: center; gap: 15px; }
-    .pvp-player { flex: 1; padding: 12px; background: #0d1117; border-radius: 4px; text-align: center; border: 1px solid #30363d; cursor: pointer; font-weight: bold; }
+    
+    /* 리셋 버튼 (모바일 세션 복구용) */
+    .reset-session-btn { background: #30363d; color: var(--text-gray); font-size: 0.8rem; margin-top: 0; }
+    
+    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); word-break: break-all; }
+    
+    /* 방 목록 카드 */
+    .pvp-room { background: #21262d; margin: 15px 0; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #444c56; }
+    .room-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--epl-gold); border-bottom: 1px solid #30363d; padding-bottom: 8px; }
+    .pvp-slots { display: flex; align-items: center; gap: 10px; }
+    .pvp-player { flex: 1; padding: 15px 5px; background: #0d1117; border-radius: 6px; text-align: center; border: 1px solid #30363d; font-weight: bold; font-size: 0.9rem; min-height: 50px; display: flex; align-items: center; justify-content: center; }
     .pvp-player.waiting { color: #484f58; border: 1px dashed #484f58; font-weight: normal; }
-    .vs-label { font-weight: bold; color: var(--red-btn); }
-    .start-btn { background: var(--blue-accent); color: #000; }
-    .leave-btn { background: var(--red-btn); }
-    .room-status { font-size: 0.8em; text-align: center; color: var(--epl-gold); }
+    .vs-label { font-weight: bold; color: var(--red-btn); font-style: italic; }
+    
+    .btn-group { display: flex; gap: 8px; }
+    .start-btn { background: var(--blue-accent); color: #000; flex: 2; }
+    .leave-btn { background: var(--red-btn); flex: 1; }
   </style>
 </head>
 <body>
@@ -32,17 +48,21 @@
 <div class="container">
   <header>
     <h1>Gibraltar Arena</h1>
-    <div class="location-tag">📍 EPL: gibraltar</div>
+    <div class="location-tag">📍 EPL: LIVE SERVER</div>
   </header>
   
-  <input type="text" id="avatarId" placeholder="Enter Avatar ID" />
-  <button id="registerBtn">Register & Join Lobby</button>
+  <div id="status">Checking connection...</div>
   
-  <div id="status">Connecting to Firebase...</div>
+  <div id="registerSection">
+    <input type="text" id="avatarId" placeholder="Enter Nickname" maxlength="12" />
+    <button id="registerBtn">Enter Arena</button>
+  </div>
 
-  <h3>Global Matchmaking</h3>
-  <button id="createRoomBtn">Create New Battle Room</button>
-  <div id="roomContainer"></div>
+  <div id="lobbySection">
+    <button id="createRoomBtn">Create New Battle Room</button>
+    <div id="roomContainer"></div>
+    <button class="reset-session-btn" onclick="forceReset()">🔄 Session Reset (Refresh All)</button>
+  </div>
 </div>
 
 <script>
@@ -59,19 +79,30 @@
   try {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    
-    db.ref(".info/connected").on("value", (snap) => {
-      const nick = localStorage.getItem('nickname') || "";
-      if (snap.val() === true) {
-        document.getElementById('status').textContent = "Server Connected ✅ " + (nick ? `[${nick}]` : "");
-      } else {
-        document.getElementById('status').textContent = "Disconnected from Server ❌";
+
+    // 1. 모바일 재접속 시 연결 복구
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        db.goOnline();
       }
     });
 
     const getNick = () => localStorage.getItem('nickname');
     const getMyRoom = () => localStorage.getItem('my_room_id');
 
+    // 서버 연결 감시
+    db.ref(".info/connected").on("value", (snap) => {
+      const nick = getNick();
+      if (snap.val() === true) {
+        document.getElementById('status').textContent = "✅ Online: " + (nick || "Guest");
+        document.getElementById('status').style.borderLeftColor = "var(--green-btn)";
+      } else {
+        document.getElementById('status').textContent = "❌ Offline: Reconnecting...";
+        document.getElementById('status').style.borderLeftColor = "var(--red-btn)";
+      }
+    });
+
+    // 방 목록 실시간 렌더링
     db.ref('rooms').on('value', (snapshot) => {
       const rooms = snapshot.val() || {};
       const container = document.getElementById('roomContainer');
@@ -82,22 +113,25 @@
 
       Object.keys(rooms).forEach(id => {
         const room = rooms[id];
-        const div = document.createElement('div');
-        div.className = 'pvp-room';
         const p1 = room.p1 || 'EMPTY';
         const p2 = room.p2 || 'EMPTY';
         const isFull = (p1 !== 'EMPTY' && p2 !== 'EMPTY');
         const isInBattle = room.status === 'BATTLE';
-        
+
+        const div = document.createElement('div');
+        div.className = 'pvp-room';
         div.innerHTML = `
-          <div class="room-status">${isInBattle ? "🔥 BATTLE IN PROGRESS" : "⏳ WAITING..."}</div>
+          <div class="room-header">
+            <span>ID: ${id.slice(-4)}</span>
+            <span>${isInBattle ? "🔥 IN BATTLE" : "⏳ WAITING"}</span>
+          </div>
           <div class="pvp-slots">
             <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="!isInBattle && joinSlot('${id}', 'p1')">${p1}</div>
             <div class="vs-label">VS</div>
             <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="!isInBattle && joinSlot('${id}', 'p2')">${p2}</div>
           </div>
-          <div style="display:flex; gap:10px;">
-            ${(isFull && !isInBattle && (p1 === nick || p2 === nick)) ? `<button class="start-btn" onclick="startBattle('${id}')">START BATTLE</button>` : ''}
+          <div class="btn-group">
+            ${(isFull && !isInBattle && (p1 === nick || p2 === nick)) ? `<button class="start-btn" onclick="startBattle('${id}')">START</button>` : ''}
             ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="destroyRoom('${id}')">EXIT</button>` : ''}
           </div>
         `;
@@ -105,11 +139,12 @@
       });
     });
 
-    // 배틀 시작 함수
+    // 배틀 시작
     window.startBattle = (roomId) => {
       db.ref('rooms/' + roomId).update({ status: 'BATTLE' });
     };
 
+    // 닉네임 등록
     document.getElementById('registerBtn').onclick = () => {
       const val = document.getElementById('avatarId').value.trim();
       if (!val) return alert("Enter Nickname");
@@ -117,6 +152,7 @@
       location.reload();
     };
 
+    // 방 생성
     document.getElementById('createRoomBtn').onclick = () => {
       const nick = getNick();
       if (!nick) return alert("Register first");
@@ -125,6 +161,7 @@
         .then(() => localStorage.setItem('my_room_id', roomId));
     };
 
+    // 슬롯 입장
     window.joinSlot = (roomId, slot) => {
       const nick = getNick();
       if (!nick) return alert("Register first");
@@ -141,6 +178,7 @@
       });
     };
 
+    // 퇴장 로직
     window.destroyRoom = (roomId) => {
       const nick = getNick();
       db.ref('rooms/' + roomId).once('value', (snap) => {
@@ -150,7 +188,7 @@
         if (!otherPlayer || otherPlayer === 'EMPTY') {
           db.ref('rooms/' + roomId).remove().then(() => localStorage.removeItem('my_room_id'));
         } else {
-          let updates = { status: 'WAITING' }; // 한 명 나가면 대기 상태로 복구
+          let updates = { status: 'WAITING' };
           if (room.p1 === nick) updates['p1'] = 'EMPTY';
           if (room.p2 === nick) updates['p2'] = 'EMPTY';
           db.ref('rooms/' + roomId).update(updates).then(() => localStorage.removeItem('my_room_id'));
@@ -158,8 +196,16 @@
       });
     };
 
+    // 강력 초기화 버튼 (모바일용)
+    window.forceReset = () => {
+      if (confirm("Reset all session data and refresh?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    };
+
   } catch (e) {
-    console.error(e);
+    console.error("Firebase Error:", e);
   }
 </script>
 </body>
