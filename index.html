@@ -11,20 +11,17 @@
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 20px; }
     .container { max-width: 750px; margin: auto; background: var(--bg-panel); padding: 30px; border-radius: 12px; border: 1px solid #30363d; }
     header { text-align: center; margin-bottom: 25px; }
-    h1 { color: var(--blue-accent); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+    h1 { color: var(--blue-accent); margin-bottom: 5px; text-transform: uppercase; }
     .location-tag { color: var(--epl-gold); font-weight: bold; border: 2px solid var(--epl-gold); display: inline-block; padding: 4px 25px; border-radius: 20px; }
     input, button { padding: 12px; margin: 10px 0; font-size: 15px; width: 100%; border-radius: 6px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; }
-    button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
     button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
     #status { margin: 15px 0; padding: 12px; background: #010409; border-radius: 6px; font-size: 0.9em; border-left: 4px solid var(--blue-accent); }
     .pvp-room { background: #21262d; margin: 12px 0; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #30363d; }
     .pvp-player { flex: 1; padding: 12px; background: #0d1117; border-radius: 4px; text-align: center; border: 1px solid #30363d; cursor: pointer; font-weight: bold; }
     .pvp-player.waiting { color: #484f58; border: 1px dashed #484f58; font-weight: normal; }
-    .vs-label { font-weight: bold; color: var(--red-btn); font-style: italic; }
-    .leave-btn { width: auto; padding: 8px 15px; background: var(--red-btn); margin: 0; font-size: 0.9em; }
-    footer { margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px; }
-    .tos-toggle { font-size: 0.8em; color: var(--text-gray); text-decoration: underline; cursor: pointer; background: none; border: none; width: auto; padding: 0; }
-    #tos-content { display: none; font-size: 0.75em; color: var(--text-gray); background: #010409; padding: 15px; border-radius: 6px; margin-top: 10px; height: 100px; overflow-y: auto; border: 1px solid #30363d; }
+    .vs-label { font-weight: bold; color: var(--red-btn); }
+    .leave-btn { width: auto; padding: 8px 15px; background: var(--red-btn); margin: 0; }
   </style>
 </head>
 <body>
@@ -32,31 +29,22 @@
 <div class="container">
   <header>
     <h1>Gibraltar Arena</h1>
-    <div class="location-tag">📍 EPL</div>
+    <div class="location-tag">📍 EPL: gibraltar</div>
   </header>
   
-  <input type="text" id="avatarId" placeholder="Enter Avatar ID (e.g. Hero#001)" />
-  <button id="registerBtn">Register & Join Global Lobby</button>
-  <button id="resetBtn" style="background: #30363d; font-size: 0.8em; margin-top: 5px;">Clear Data / Logout</button>
+  <input type="text" id="avatarId" placeholder="Enter Avatar ID" />
+  <button id="registerBtn">Register & Join Lobby</button>
   
-  <div id="status">Status: Connecting to Server...</div>
+  <div id="status">Connecting to Firebase...</div>
 
-  <h3>Live Global Matchmaking</h3>
+  <h3>Global Matchmaking</h3>
   <button id="createRoomBtn">Create New Battle Room</button>
   <div id="roomContainer"></div>
-
-  <footer>
-    <button class="tos-toggle" onclick="toggleToS()">View Terms of Service / 약관 보기</button>
-    <div id="tos-content">
-      <strong>[Terms of Service]</strong><br>
-      1. Data is synced globally via Firebase. 2. Users are responsible for their conduct. 3. Exit destroys room.
-    </div>
-  </footer>
 </div>
 
 <script>
-  // ★ 여기를 교체하세요: Firebase에서 복사한 firebaseConfig 내용을 붙여넣으세요.
-   const firebaseConfig = {
+  // 본인의 Firebase 설정값
+  const firebaseConfig = {
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo",
     authDomain: "gibraltar-live.firebaseapp.com",
     databaseURL: "https://gibraltar-live-default-rtdb.firebaseio.com",
@@ -66,95 +54,94 @@
     appId: "1:286453523509:web:32f97e69cbed2c41fcfd7c"
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  const getNick = () => localStorage.getItem('nickname');
-  const getMyRoom = () => localStorage.getItem('my_room_id');
-
-  // 실시간 방 목록 가져오기
-  db.ref('rooms').on('value', (snapshot) => {
-    const rooms = snapshot.val() || {};
-    render(rooms);
-  });
-
-  function render(rooms) {
-    const nick = getNick();
-    const myRoom = getMyRoom();
-    document.getElementById('status').textContent = nick ? `Logged in as: ${nick}` : "Register to join the global arena.";
+  // Firebase 초기화 (호환 모드 방식)
+  try {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
     
-    const cBtn = document.getElementById('createRoomBtn');
-    cBtn.disabled = !!myRoom || !nick;
-    cBtn.textContent = myRoom ? "You have an active room" : "Create New Battle Room";
-
-    const container = document.getElementById('roomContainer');
-    container.innerHTML = '';
-
-    Object.keys(rooms).forEach(id => {
-      const room = rooms[id];
-      const div = document.createElement('div');
-      div.className = 'pvp-room';
-      const p1 = room.p1 || 'EMPTY';
-      const p2 = room.p2 || 'EMPTY';
-      
-      div.innerHTML = `
-        <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p1')">${p1}</div>
-        <div class="vs-label">VS</div>
-        <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p2')">${p2}</div>
-        ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="destroyRoom('${id}')">Exit</button>` : ''}
-      `;
-      container.appendChild(div);
+    // 서버 연결 확인
+    db.ref(".info/connected").on("value", (snap) => {
+      const nick = localStorage.getItem('nickname') || "";
+      if (snap.val() === true) {
+        document.getElementById('status').textContent = "Server Connected ✅ " + (nick ? `[${nick}]` : "");
+      } else {
+        document.getElementById('status').textContent = "Disconnected from Server ❌";
+      }
     });
-  }
 
-  document.getElementById('registerBtn').onclick = () => {
-    const val = document.getElementById('avatarId').value.trim();
-    if (!val) return alert("Enter Nickname");
-    localStorage.setItem('nickname', val);
-    render({}); 
-  };
+    const getNick = () => localStorage.getItem('nickname');
+    const getMyRoom = () => localStorage.getItem('my_room_id');
 
-  document.getElementById('createRoomBtn').onclick = () => {
-    const nick = getNick();
-    const roomId = Date.now().toString();
-    db.ref('rooms/' + roomId).set({ p1: nick, p2: 'EMPTY' })
-      .then(() => localStorage.setItem('my_room_id', roomId));
-  };
+    // 실시간 방 목록 리스너
+    db.ref('rooms').on('value', (snapshot) => {
+      const rooms = snapshot.val() || {};
+      const container = document.getElementById('roomContainer');
+      container.innerHTML = '';
+      const nick = getNick();
 
-  window.joinSlot = (roomId, slot) => {
-    const nick = getNick();
-    if (!nick) return alert("Register first!");
+      document.getElementById('createRoomBtn').disabled = !!getMyRoom() || !nick;
 
-    db.ref('rooms/' + roomId).once('value', (snap) => {
-      const room = snap.val();
-      if (!room) return;
-      if (room[slot] !== 'EMPTY' && room[slot] !== nick) return alert("Slot taken!");
-
-      const updates = {};
-      if (room.p1 === nick) updates['p1'] = 'EMPTY';
-      if (room.p2 === nick) updates['p2'] = 'EMPTY';
-      updates[slot] = nick;
-      
-      db.ref('rooms/' + roomId).update(updates);
-    });
-  };
-
-  window.destroyRoom = (roomId) => {
-    db.ref('rooms/' + roomId).remove()
-      .then(() => {
-        if (localStorage.getItem('my_room_id') === roomId) localStorage.removeItem('my_room_id');
+      Object.keys(rooms).forEach(id => {
+        const room = rooms[id];
+        const div = document.createElement('div');
+        div.className = 'pvp-room';
+        const p1 = room.p1 || 'EMPTY';
+        const p2 = room.p2 || 'EMPTY';
+        
+        div.innerHTML = `
+          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p1')">${p1}</div>
+          <div class="vs-label">VS</div>
+          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="joinSlot('${id}', 'p2')">${p2}</div>
+          ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="destroyRoom('${id}')">Exit</button>` : ''}
+        `;
+        container.appendChild(div);
       });
-  };
+    });
 
-  document.getElementById('resetBtn').onclick = () => {
-    localStorage.clear();
-    location.reload();
-  };
+    document.getElementById('registerBtn').onclick = () => {
+      const val = document.getElementById('avatarId').value.trim();
+      if (!val) return alert("Enter Nickname");
+      localStorage.setItem('nickname', val);
+      location.reload();
+    };
 
-  window.toggleToS = () => {
-    const content = document.getElementById('tos-content');
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-  };
+    document.getElementById('createRoomBtn').onclick = () => {
+      const nick = getNick();
+      if (!nick) return alert("Register first");
+      const roomId = "room_" + Date.now();
+      db.ref('rooms/' + roomId).set({ p1: nick, p2: 'EMPTY' })
+        .then(() => localStorage.setItem('my_room_id', roomId))
+        .catch(e => alert("Error: " + e.message));
+    };
+
+    window.joinSlot = (roomId, slot) => {
+      const nick = getNick();
+      if (!nick) return alert("Register first");
+      db.ref('rooms/' + roomId).once('value', (snap) => {
+        const room = snap.val();
+        if (!room) return;
+        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return alert("Slot taken");
+        
+        let updates = {};
+        if (room.p1 === nick) updates['p1'] = 'EMPTY';
+        if (room.p2 === nick) updates['p2'] = 'EMPTY';
+        updates[slot] = nick;
+        db.ref('rooms/' + roomId).update(updates);
+      });
+    };
+
+    window.destroyRoom = (roomId) => {
+      db.ref('rooms/' + roomId).remove().then(() => {
+        if (localStorage.getItem('my_room_id') === roomId) {
+          localStorage.removeItem('my_room_id');
+        }
+      });
+    };
+
+  } catch (e) {
+    document.getElementById('status').textContent = "Setup Error: " + e.message;
+    console.error(e);
+  }
 </script>
 </body>
 </html>
