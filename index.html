@@ -43,7 +43,6 @@
 </div>
 
 <script>
-  // 본인의 Firebase 설정값
   const firebaseConfig = {
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo",
     authDomain: "gibraltar-live.firebaseapp.com",
@@ -54,12 +53,10 @@
     appId: "1:286453523509:web:32f97e69cbed2c41fcfd7c"
   };
 
-  // Firebase 초기화 (호환 모드 방식)
   try {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    // 서버 연결 확인
     db.ref(".info/connected").on("value", (snap) => {
       const nick = localStorage.getItem('nickname') || "";
       if (snap.val() === true) {
@@ -72,7 +69,6 @@
     const getNick = () => localStorage.getItem('nickname');
     const getMyRoom = () => localStorage.getItem('my_room_id');
 
-    // 실시간 방 목록 리스너
     db.ref('rooms').on('value', (snapshot) => {
       const rooms = snapshot.val() || {};
       const container = document.getElementById('roomContainer');
@@ -130,10 +126,32 @@
       });
     };
 
+    // 개선된 퇴장 로직: 혼자 있으면 삭제, 둘이 있으면 자리만 비움
     window.destroyRoom = (roomId) => {
-      db.ref('rooms/' + roomId).remove().then(() => {
-        if (localStorage.getItem('my_room_id') === roomId) {
-          localStorage.removeItem('my_room_id');
+      const nick = getNick();
+      if (!nick) return;
+
+      db.ref('rooms/' + roomId).once('value', (snap) => {
+        const room = snap.val();
+        if (!room) return;
+
+        const isP1 = room.p1 === nick;
+        const isP2 = room.p2 === nick;
+        const otherPlayer = isP1 ? room.p2 : room.p1;
+
+        // 상대방이 없거나 EMPTY면 방 폭파
+        if (!otherPlayer || otherPlayer === 'EMPTY') {
+          db.ref('rooms/' + roomId).remove().then(() => {
+            localStorage.removeItem('my_room_id');
+          });
+        } else {
+          // 상대방이 있으면 내 자리만 비움
+          let updates = {};
+          if (isP1) updates['p1'] = 'EMPTY';
+          if (isP2) updates['p2'] = 'EMPTY';
+          db.ref('rooms/' + roomId).update(updates).then(() => {
+            localStorage.removeItem('my_room_id');
+          });
         }
       });
     };
