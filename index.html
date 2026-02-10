@@ -25,7 +25,6 @@
       background-color: var(--bg-color); 
       color: var(--text-main); 
       font-family: 'Inter', sans-serif; 
-      line-height: 1.6;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -33,7 +32,6 @@
       padding: 40px 20px;
     }
 
-    /* Header Section */
     header { text-align: center; margin-bottom: 50px; }
     header h1 { 
       font-family: 'Cinzel', serif; 
@@ -53,7 +51,6 @@
     .main-container { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
     @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
 
-    /* Left Sidebar */
     .sidebar { display: flex; flex-direction: column; gap: 20px; }
     .status-badge { 
       background: #000; border-left: 4px solid var(--accent-gold); 
@@ -64,10 +61,9 @@
     .rules-list { font-size: 0.85rem; color: var(--text-dim); list-style: none; }
     .rules-list li { margin-bottom: 15px; }
 
-    /* Right Main Lobby */
-    .warrior-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .warrior-info span { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
-    .warrior-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
+    .avatar-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .avatar-info span { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+    .avatar-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
     .btn-reset { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 6px 12px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
     .btn-reset:hover { border-color: var(--accent-red); color: var(--accent-red); }
 
@@ -76,7 +72,6 @@
     .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
     .btn-create:disabled { background: #333; cursor: not-allowed; }
 
-    /* Room Cards */
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; position: relative; }
     .room-id { font-size: 0.65rem; color: #444; position: absolute; top: 15px; left: 15px; }
@@ -94,7 +89,6 @@
     .room-actions { display: flex; gap: 10px; }
     .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; border-radius: 2px; }
 
-    /* Login UI */
     #auth-section { max-width: 400px; width: 100%; margin-top: 50px; }
     input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.2rem; font-family: 'Cinzel', serif; }
   </style>
@@ -107,8 +101,8 @@
   </header>
 
   <div id="auth-section" class="card" style="display:none;">
-    <input type="text" id="nickInput" placeholder="ENTER WARRIOR NAME" maxlength="12">
-    <button class="btn-create" style="width:100%" onclick="register()">FORGE IDENTITY</button>
+    <input type="text" id="avatarInput" placeholder="ENTER AVATAR NAME" maxlength="12">
+    <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
 
   <div id="lobby-section" class="main-container" style="display:none;">
@@ -119,16 +113,16 @@
         <ul class="rules-list">
           <li>1. Forge your name and enter the Gibraltar Arena.</li>
           <li>2. Enter a slot to challenge or defend.</li>
-          <li>3. When both warriors are READY, the battle begins.</li>
+          <li>3. When both avatars are READY, the battle begins.</li>
         </ul>
       </div>
     </div>
 
     <div class="lobby-content">
-      <div class="warrior-profile card">
-        <div class="warrior-info">
-          <span>Current Warrior</span>
-          <h2 id="myNickDisplay">-</h2>
+      <div class="avatar-profile card">
+        <div class="avatar-info">
+          <span>Current Avatar</span>
+          <h2 id="avatarDisplay">-</h2>
         </div>
         <button class="btn-reset" onclick="forceReset()">RESET PROFILE</button>
       </div>
@@ -144,7 +138,7 @@
 
 <script>
   let db;
-  const getNick = () => localStorage.getItem('arena_nick');
+  const getAvatar = () => localStorage.getItem('arena_avatar');
 
   window.onload = function() {
     const firebaseConfig = { 
@@ -155,7 +149,6 @@
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
     
-    // 연결 상태 감시
     db.ref(".info/connected").on("value", s => {
       document.getElementById('status').innerText = s.val() ? "⚡ ARENA CONNECTED" : "⛓️ DISCONNECTED";
     });
@@ -164,11 +157,11 @@
   };
 
   function checkAuth() {
-    const nick = getNick();
-    if (nick) {
+    const avatar = getAvatar();
+    if (avatar) {
       document.getElementById('auth-section').style.display = 'none';
       document.getElementById('lobby-section').style.display = 'grid';
-      document.getElementById('myNickDisplay').innerText = nick;
+      document.getElementById('avatarDisplay').innerText = avatar;
       startLobby();
     } else {
       document.getElementById('auth-section').style.display = 'block';
@@ -176,9 +169,9 @@
   }
 
   function register() {
-    const val = document.getElementById('nickInput').value.trim().toUpperCase();
+    const val = document.getElementById('avatarInput').value.trim().toUpperCase();
     if (val && val !== 'EMPTY') {
-      localStorage.setItem('arena_nick', val);
+      localStorage.setItem('arena_avatar', val);
       location.reload();
     }
   }
@@ -187,22 +180,22 @@
     db.ref('rooms').on('value', snap => {
       const rooms = snap.val() || {};
       const container = document.getElementById('roomContainer');
-      const nick = getNick();
+      const currentAvatar = getAvatar();
       container.innerHTML = '';
       
-      const inRoom = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick);
+      const inRoom = Object.keys(rooms).find(id => rooms[id].p1 === currentAvatar || rooms[id].p2 === currentAvatar);
       document.getElementById('createRoomBtn').disabled = !!inRoom;
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
 
-        // 🛡️ [핵심] 유령 데이터(wef, 빈방, undefined) 자동 삭제 엔진
+        // 유령 데이터 필터링
         if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') || !r.p1) {
           db.ref(`rooms/${id}`).remove();
           return;
         }
 
-        const myRole = (r.p1 === nick) ? 'p1' : (r.p2 === nick ? 'p2' : null);
+        const myRole = (r.p1 === currentAvatar) ? 'p1' : (r.p2 === currentAvatar ? 'p2' : null);
 
         const div = document.createElement('div');
         div.className = 'room-card';
@@ -227,32 +220,33 @@
   }
 
   function createRoom() {
-    const nick = getNick();
+    const avatar = getAvatar();
     const newRef = db.ref('rooms').push();
     newRef.set({
-      p1: nick, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING'
+      p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING'
     });
   }
 
   window.join = (rid, slot) => {
-    const nick = getNick();
+    const avatar = getAvatar();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        if (r[slot] !== 'EMPTY' && r[slot] !== nick) return r; // 꽉 참
-        if (r.p1 === nick) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        if (r.p2 === nick) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        r[slot] = nick;
+        if (r[slot] !== 'EMPTY' && r[slot] !== avatar) return r;
+        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
+        r[slot] = avatar;
       }
       return r;
     });
   };
 
   window.leave = (rid) => {
+    const avatar = getAvatar();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        if (r.p1 === getNick()) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        else if (r.p2 === getNick()) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null; // 방 삭제
+        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
+        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null;
         r.status = 'WAITING';
       }
       return r;
