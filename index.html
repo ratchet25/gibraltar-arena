@@ -25,14 +25,14 @@
     .room-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }
     .room-card { background:var(--card-bg); border:1px solid var(--border-color); padding:35px 20px 20px; position:relative; }
     
-    /* 방 이름(ID) 스타일 */
-    .room-id-label { position:absolute; top:12px; left:15px; font-size:0.6rem; color:#444; font-weight:800; letter-spacing:1px; }
+    /* 방 이름(ID) 디자인 강화 */
+    .room-id-label { position:absolute; top:12px; left:15px; font-size:0.7rem; color:var(--accent-gold); font-weight:900; font-family:'Cinzel'; letter-spacing:1px; opacity:0.7; }
     
     .room-status { position:absolute; top:0; right:0; padding:4px 12px; font-size:0.65rem; font-weight:900; border-bottom-left-radius:4px; }
     .status-waiting-label { background:#333; color:#888; }
     .status-battle-label { background:var(--accent-red); color:#fff; box-shadow:0 0 10px rgba(255, 62, 62, 0.5); }
     .duel-area { display:flex; align-items:center; justify-content:center; gap:15px; margin:25px 0; }
-    .player-slot { flex:1; height:65px; background:#000; border:1px dashed #333; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; transition:0.3s; color:#444; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 5px; }
+    .player-slot { flex:1; height:65px; background:#000; border:1px dashed #333; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; transition:0.3s; color:#444; overflow:hidden; }
     .player-slot.occupied { border:1px solid var(--accent-gold); color:var(--accent-gold); font-weight:800; font-family:'Cinzel', serif; }
     .player-slot.ready { background:rgba(255, 183, 3, 0.15); border-style:solid; }
     .btn-room { flex:1; padding:8px; border:none; font-weight:800; font-family:'Cinzel', serif; font-size:0.7rem; cursor:pointer; }
@@ -80,6 +80,16 @@
   let allRoomsData = {};
   const getAvatar = () => localStorage.getItem('arena_avatar');
 
+  // 랜덤 방 코드 생성기 (4자리)
+  function generateRoomName() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
   window.onload = function() {
     firebase.initializeApp({ 
       apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
@@ -123,20 +133,21 @@
 
       Object.keys(allRoomsData).forEach(id => {
         const r = allRoomsData[id];
-        const isP1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1 === 'undefined');
-        const isP2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2 === 'undefined');
+        const isP1Empty = (!r.p1 || r.p1 === 'EMPTY');
+        const isP2Empty = (!r.p2 || r.p2 === 'EMPTY');
 
         if (isP1Empty && isP2Empty) { db.ref(`rooms/${id}`).remove(); return; }
 
         const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
-        // 방 ID의 앞 5글자만 추출하여 표시 (사진 느낌)
-        const shortId = id.substring(0, 5).toUpperCase();
+        
+        // 방 이름: 생성 시 저장된 customName이 있으면 쓰고, 없으면 ID 일부 사용
+        const displayRoomName = r.customName || id.substring(1, 5).toUpperCase();
 
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
-          <div class="room-id-label">#${shortId}</div>
+          <div class="room-id-label">#${displayRoomName}</div>
           <div class="room-status ${isBattle?'status-battle-label':'status-waiting-label'}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
             <div class="player-slot ${!isP1Empty?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${isP1Empty?'EMPTY':r.p1}</div>
@@ -182,8 +193,7 @@
 
   window.join = async (rid, slot) => {
     const avatar = getAvatar();
-    const room = allRoomsData[rid];
-    const isTargetEmpty = (!room[slot] || room[slot] === 'EMPTY' || room[slot] === 'undefined');
+    const isTargetEmpty = (!allRoomsData[rid][slot] || allRoomsData[rid][slot] === 'EMPTY');
     if (isTargetEmpty) await cleanupAndJoin(avatar, rid, slot);
   };
 
@@ -191,9 +201,7 @@
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
         r[role + 'Ready'] = !r[role + 'Ready'];
-        const p1Valid = (r.p1 && r.p1 !== 'EMPTY');
-        const p2Valid = (r.p2 && r.p2 !== 'EMPTY');
-        r.status = (p1Valid && p2Valid && r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
+        r.status = (r.p1 !== 'EMPTY' && r.p2 !== 'EMPTY' && r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
       }
       return r;
     });
@@ -205,7 +213,7 @@
       if (r) {
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        if ((!r.p1 || r.p1==='EMPTY') && (!r.p2 || r.p2==='EMPTY')) return null;
+        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null;
         r.status = 'WAITING';
       }
       return r;
@@ -214,19 +222,29 @@
 
   async function createRoom() {
     const avatar = getAvatar();
+    // 기존 위치 청소
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
       const room = allRoomsData[rid];
       if (room.p1 === avatar || room.p2 === avatar) {
-        let updates = {};
-        if (room.p1 === avatar) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; }
-        if (room.p2 === avatar) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; }
-        updates['status'] = 'WAITING';
+        let updates = { status: 'WAITING' };
+        if (room.p1 === avatar) { updates.p1 = 'EMPTY'; updates.p1Ready = false; }
+        if (room.p2 === avatar) { updates.p2 = 'EMPTY'; updates.p2Ready = false; }
         promises.push(db.ref(`rooms/${rid}`).update(updates));
       }
     });
     await Promise.all(promises);
-    db.ref('rooms').push().set({ p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
+    
+    // 새 랜덤 방 이름 생성 후 저장
+    const roomName = generateRoomName();
+    db.ref('rooms').push().set({ 
+      customName: roomName, 
+      p1: avatar, 
+      p2: 'EMPTY', 
+      p1Ready: false, 
+      p2Ready: false, 
+      status: 'WAITING' 
+    });
   }
 
   window.forceReset = () => { localStorage.clear(); location.reload(); };
