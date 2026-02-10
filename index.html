@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | Ironclad</title>
+  <title>Gibraltar Arena | Solid & Secure</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
@@ -15,7 +15,6 @@
       --slot-empty: #120e0c; --slot-occupied: #3d2b1f;
     }
 
-    /* 🛡️ 브라우저간 레이아웃 틀어짐 방지 (크롬, 엣지 공통) */
     html { scrollbar-gutter: stable; } 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
@@ -26,11 +25,7 @@
     }
 
     .main-wrapper { max-width: 1300px; width: 100%; display: flex; flex-direction: column; gap: 30px; }
-    
-    /* 메인 레이아웃 그리드 */
-    @media (min-width: 1000px) { 
-      .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; } 
-    }
+    @media (min-width: 1000px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; } }
 
     header { text-align: center; border-bottom: 2px solid var(--fire-red); padding-bottom: 20px; margin-bottom: 10px; }
     h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2.8rem; letter-spacing: 4px; text-shadow: 0 0 20px var(--fire-red); }
@@ -38,13 +33,12 @@
 
     .card { background: var(--card-iron); border-radius: 12px; border: 2px solid var(--border-metal); padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     
-    /* 🛡️ 사이드바 요소 고정 */
     #status { height: 45px; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); border-radius: 6px; font-weight: bold; margin-bottom: 20px; font-size: 0.85rem; }
     .guide-box { border-left: 5px solid var(--fire-red); min-height: 200px; }
     .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.2rem; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 8px; }
     .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.8; }
 
-    /* 🛡️ 프로필 카드 높이 절대 고정 (가장 중요한 부분) */
+    /* 프로필 카드 높이 고정 */
     .profile-card { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; }
     .nick-container { height: 100%; display: flex; flex-direction: column; justify-content: center; }
     .btn-row { display: flex; gap: 10px; margin-top: 15px; height: 45px; }
@@ -52,23 +46,17 @@
     input { padding: 12px; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 6px; outline: none; }
     button { cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.2s; border: none; border-radius: 6px; }
     .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; height: 50px; }
-    .primary-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
-    .primary-btn:disabled { background: #333; color: #666; transform: none; cursor: not-allowed; }
+    .primary-btn:hover { filter: brightness(1.2); }
+    .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-    /* 🛡️ 방 목록 그리드 레이아웃 */
+    /* 그리드 레이아웃 */
     .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 50px; }
-    #roomContainer { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-      gap: 25px; 
-    }
+    #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
 
-    /* 🛡️ 방 인스턴스 높이 절대 고정 */
+    /* 방 인스턴스 높이 고정 */
     .pvp-room { 
       background: #251e1a; padding: 25px; border-radius: 10px; border: 2px solid var(--border-metal); 
-      height: 300px; /* 고정 */
-      display: flex; flex-direction: column; justify-content: space-between;
-      position: relative;
+      height: 300px; display: flex; flex-direction: column; justify-content: space-between; position: relative;
     }
     .pvp-room.battle-active { border-color: var(--fire-red); animation: flame-pulse 1.5s infinite; background: #2d1610; }
     @keyframes flame-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); } 50% { box-shadow: 0 0 35px rgba(255, 69, 0, 0.6); } }
@@ -84,16 +72,24 @@
     
     .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
     .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); }
-    .slot-ready { background: rgba(255, 215, 0, 0.15); border: 2px solid var(--gold); color: var(--gold); animation: shake 0.5s infinite; }
-    @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } }
+    
+    /* 🛡️ READY 상태에서 흔들리는 효과(animation) 제거 */
+    .slot-ready { 
+      background: rgba(255, 215, 0, 0.2); 
+      border: 2px solid var(--gold); 
+      color: var(--gold); 
+      box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3);
+    }
 
     .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.6rem; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
-    /* 🛡️ 하단 버튼 영역 높이 고정 (버튼이 사라져도 공간 유지) */
+    /* 하단 버튼 영역 고정 */
     .room-actions { height: 60px; display: flex; align-items: flex-end; }
     .btn-group { display: flex; gap: 10px; width: 100%; height: 45px; }
     .btn-group button { flex: 1; font-size: 0.85rem; height: 100%; }
     .leave-btn { background: #444; color: #fff; }
+    /* 🛡️ 전투 중 퇴각 버튼 스타일 (시각적 피드백용) */
+    .leave-btn:disabled { background: #222; color: #555; cursor: not-allowed; opacity: 0.6; }
 
     #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.5); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
   </style>
@@ -163,7 +159,6 @@
 </div>
 
 <script>
-  // --- 1. FIREBASE INITIALIZATION ---
   const firebaseConfig = { 
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
     authDomain: "gibraltar-live.firebaseapp.com", 
@@ -177,7 +172,6 @@
   if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
   const db = firebase.database();
 
-  // --- 2. AUDIO ENGINE ---
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -189,7 +183,6 @@
     else if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
   }
 
-  // --- 3. APP LOGIC ---
   const getNick = () => localStorage.getItem('nickname');
   let currentRoomId = null;
   let lastBattleCount = 0;
@@ -250,7 +243,7 @@
             <div class="btn-group">
               ${(!isInBattle && p1!=='EMPTY' && p2!=='EMPTY') ? 
                 `<button class="primary-btn" onclick="toggleReady('${id}', '${myRole}')" style="${amIReady ? 'background:var(--gold); color:#000;' : ''}">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-              <button class="leave-btn" onclick="leaveRoom('${id}')">RETREAT</button>
+              <button class="leave-btn" onclick="leaveRoom('${id}', '${room.status}')" ${isInBattle ? 'disabled' : ''}>RETREAT</button>
             </div>
           ` : ''}
         </div>
@@ -295,7 +288,13 @@
     });
   };
 
-  window.leaveRoom = (rid) => { 
+  // 🛡️ 전투 중 퇴각 방지 로직 추가
+  window.leaveRoom = (rid, status) => { 
+    if (status === 'BATTLE') {
+      alert("⚔️ 전투 중에는 투기장을 떠날 수 없습니다!");
+      return;
+    }
+    
     playSound('click'); 
     db.ref('rooms/'+rid).transaction(r => { 
       if(r) { 
