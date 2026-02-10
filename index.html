@@ -18,14 +18,23 @@
     body { background: var(--bg-deep); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; background-image: linear-gradient(180deg, #161616 0%, #0f0f0f 100%); }
     .main-wrapper { max-width: 1300px; width: 100%; display: flex; flex-direction: column; gap: 30px; }
     @media (min-width: 1000px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 40px; align-items: start; } }
+    
     header { text-align: center; margin-bottom: 10px; }
     h1 { font-family: 'Cinzel', serif; color: #fff; font-size: 3.2rem; font-weight: 900; letter-spacing: 5px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .subtitle { color: var(--fire-red); font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 8px; margin-top: -5px; display: block; }
+    
     .card { background: var(--card-iron); border-radius: 8px; border: 1px solid var(--border-metal); padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
     #status { height: 45px; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); border-left: 4px solid var(--gold); font-weight: bold; margin-bottom: 20px; font-size: 0.85rem; letter-spacing: 1px; }
+    
+    /* 사이드바 가이드 & 약관 스타일 */
+    .side-panel { display: flex; flex-direction: column; gap: 20px; }
     .guide-box { border-bottom: 3px solid var(--fire-red); }
+    .legal-box { border-top: 2px solid #444; background: #151515; }
     .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.2rem; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 10px; }
+    .legal-title { font-family: 'Cinzel', serif; color: #777; font-size: 0.9rem; margin-bottom: 10px; display: block; letter-spacing: 1px; }
     .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.8; }
+    .legal-text { color: #555; font-size: 0.75rem; line-height: 1.6; text-align: justify; }
+
     .profile-card { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; display: flex; flex-direction: column; justify-content: center; }
     .nick-container { height: 100%; display: flex; flex-direction: column; justify-content: center; }
     .btn-row { display: flex; gap: 10px; margin-top: 15px; height: 45px; }
@@ -65,13 +74,22 @@
   <div class="layout-container">
     <div class="side-panel">
       <div id="status">CONNECTING...</div>
+      
       <div class="card guide-box">
         <span class="guide-title">📜 ARENA RULES</span>
         <div class="guide-text">
-          before begin, visit <b>gibraltar</b> epl in e2v1 <br><br>
-          1. choose your e2v1 avatar name and enter the <b>Gibraltar Arena</b>.<br><br>
+          1. Forge your name and enter the <b>Gibraltar Arena</b>.<br><br>
           2. Enter a slot to challenge or defend.<br><br>
           3. When both warriors are <b>READY</b>, the battle begins.
+        </div>
+      </div>
+
+      <div class="card legal-box">
+        <span class="legal-title">TERMS & DISCLAIMER</span>
+        <div class="legal-text">
+          This service operates in strict accordance with the <b>e2v1 community guidelines</b>. 
+          <br><br>
+          By using this webpage, you acknowledge and agree that the developers and operators shall not be held liable for any loss of <b>Earth2 digital assets</b>, including but not limited to <b>Essence</b> and <b>Ether</b>, resulting from gameplay, technical errors, or connectivity issues. Use at your own risk.
         </div>
       </div>
     </div>
@@ -118,6 +136,7 @@
 </div>
 
 <script>
+  // Firebase configuration 및 모든 로직은 기존과 동일하게 유지 (자동 청소 및 Presence 시스템 포함)
   const firebaseConfig = { 
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
     authDomain: "gibraltar-live.firebaseapp.com", 
@@ -132,12 +151,9 @@
   const db = firebase.database();
   const getNick = () => localStorage.getItem('nickname');
 
-  // 🛡️ [추가] 자동 퇴장 시스템 (Presence)
   function setupPresence(rid, role) {
     const presenceRef = db.ref(`rooms/${rid}/${role}`);
     const readyRef = db.ref(`rooms/${rid}/${role}Ready`);
-    
-    // 연결이 끊기면 슬롯 비우기
     presenceRef.onDisconnect().set('EMPTY');
     readyRef.onDisconnect().set(false);
   }
@@ -148,25 +164,21 @@
     container.innerHTML = '';
     const nick = getNick();
     const now = Date.now();
-    const STALE_TIME = 3600000; // 1시간
+    const STALE_TIME = 3600000;
     
     currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
     document.getElementById('createRoomBtn').disabled = !!currentRoomId;
 
     Object.keys(rooms).sort().reverse().forEach(id => {
       const room = rooms[id];
-      
-      // 🛡️ [추가] 1시간 이상 활동 없는 방 자동 청소
       if (room.lastUpdate && (now - room.lastUpdate > STALE_TIME)) {
         db.ref('rooms/' + id).remove();
         return;
       }
-
       const p1 = room.p1 || 'EMPTY', p2 = room.p2 || 'EMPTY';
       const isInBattle = room.status === 'BATTLE';
       const myRole = (p1 === nick) ? 'p1' : (p2 === nick ? 'p2' : null);
       const amIReady = (myRole === 'p1' ? room.p1Ready : room.p2Ready);
-
       const div = document.createElement('div');
       div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
@@ -190,7 +202,7 @@
         if(r.p1===nick) {r.p1='EMPTY'; r.p1Ready=false;}
         if(r.p2===nick) {r.p2='EMPTY'; r.p2Ready=false;}
         r[slot]=nick; r.lastUpdate = Date.now();
-        setupPresence(rid, slot); // 접속 시 Presence 설정
+        setupPresence(rid, slot);
       }
       return r;
     });
@@ -211,7 +223,6 @@
     }); 
   };
 
-  // 나머지 초기화 로직 (사운드, 닉네임 등은 기존과 동일)
   window.toggleReady = (rid, role) => { db.ref('rooms/' + rid).transaction(r => { if(r) { if(role==='p1') r.p1Ready = !r.p1Ready; else r.p2Ready = !r.p2Ready; if(r.p1Ready && r.p2Ready) r.status = 'BATTLE'; r.lastUpdate = Date.now(); } return r; }); };
   window.toggleRename = (e) => { document.getElementById('nick-display-mode').style.display = e ? 'none' : 'flex'; document.getElementById('nick-edit-mode').style.display = e ? 'flex' : 'none'; };
   window.applyNewNick = () => { const n = document.getElementById('newNickInput').value.trim(); if(n) { localStorage.setItem('nickname', n); location.reload(); } };
@@ -223,4 +234,3 @@
 </script>
 </body>
 </html>
-
