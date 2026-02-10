@@ -3,81 +3,100 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | Ceasefire</title>
+  <title>Gibraltar Arena | Cosmic Obelisk</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root { 
-      --bg-stone: #1a1614; --card-iron: #2d241f; --fire-red: #ff4500; 
-      --fire-orange: #ff8c00; --gold: #ffd700; --text-light: #f4ece1; 
-      --text-dim: #a8998a; --border-metal: #4a3b32;
-      --slot-empty: #120e0c; --slot-occupied: #3d2b1f;
+      --bg-void: #020408; --card-obsidian: #0b0e14; --cosmic-purple: #8a2be2; 
+      --nebula-blue: #00b4d8; --stellar-gold: #f0faff; --text-dim: #708090; 
+      --border-void: #1a2233; --slot-void: #05070a; --slot-energy: #141b2d;
     }
 
     html { scrollbar-gutter: stable; } 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body { 
-      background: var(--bg-stone); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg-void); color: var(--stellar-gold); font-family: 'Noto Sans KR', sans-serif;
       min-height: 100vh; padding: 30px 20px; display: flex; flex-direction: column; align-items: center;
-      background-image: radial-gradient(circle at center, #2a1a15 0%, #1a1614 100%);
+      /* 성운 느낌의 배경 레이어 */
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 180, 216, 0.1) 0%, transparent 40%),
+        linear-gradient(to bottom, #020408, #050a14);
+      background-attachment: fixed;
     }
 
     .main-wrapper { max-width: 1300px; width: 100%; display: flex; flex-direction: column; gap: 30px; }
-    @media (min-width: 1000px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; } }
+    @media (min-width: 1000px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 40px; align-items: start; } }
 
-    header { text-align: center; border-bottom: 2px solid var(--fire-red); padding-bottom: 20px; margin-bottom: 10px; }
-    h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2.8rem; letter-spacing: 4px; text-shadow: 0 0 20px var(--fire-red); }
-    .location-tag { color: var(--fire-orange); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-top: 5px; display: block; }
-
-    .card { background: var(--card-iron); border-radius: 12px; border: 2px solid var(--border-metal); padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    header { text-align: center; border-bottom: 1px solid var(--cosmic-purple); padding-bottom: 25px; margin-bottom: 10px; position: relative; }
+    header::after { content: ''; position: absolute; bottom: -1px; left: 25%; width: 50%; height: 1px; background: var(--nebula-blue); box-shadow: 0 0 15px var(--nebula-blue); }
     
-    #status { height: 45px; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); border-radius: 6px; font-weight: bold; margin-bottom: 20px; font-size: 0.85rem; }
-    .guide-box { border-left: 5px solid var(--fire-red); min-height: 200px; }
-    .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.2rem; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 8px; }
-    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.8; }
+    h1 { font-family: 'Cinzel', serif; color: #fff; font-size: 3rem; letter-spacing: 6px; text-shadow: 0 0 15px var(--cosmic-purple), 0 0 30px rgba(138, 43, 226, 0.5); }
+    .location-tag { color: var(--nebula-blue); font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-top: 8px; display: block; letter-spacing: 3px; }
 
-    .profile-card { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; }
-    .nick-container { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+    .card { background: var(--card-obsidian); border-radius: 4px; border: 1px solid var(--border-void); padding: 25px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, var(--cosmic-purple), transparent); }
+    
+    #status { height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: var(--nebula-blue); border: 1px solid var(--border-void); border-radius: 2px; font-family: 'Orbitron', sans-serif; font-weight: bold; margin-bottom: 20px; font-size: 0.75rem; letter-spacing: 1px; }
+    .guide-box { border-right: 1px solid rgba(138, 43, 226, 0.3); }
+    .guide-title { font-family: 'Cinzel', serif; color: var(--nebula-blue); font-size: 1.1rem; margin-bottom: 18px; display: block; border-bottom: 1px solid var(--border-void); padding-bottom: 10px; letter-spacing: 1px; }
+    .guide-text { color: var(--text-dim); font-size: 0.9rem; line-height: 2; font-weight: 300; }
+
+    /* 프로필 카드 높이 고정 (180px) */
+    .profile-card { height: 180px; margin-bottom: 30px; display: flex; flex-direction: column; justify-content: center; }
     .btn-row { display: flex; gap: 10px; margin-top: 15px; height: 45px; }
 
-    input { padding: 12px; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 6px; outline: none; }
-    button { cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.2s; border: none; border-radius: 6px; }
-    .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; height: 50px; }
-    .primary-btn:hover { filter: brightness(1.2); }
+    input { padding: 12px; font-size: 15px; width: 100%; border: 1px solid var(--border-void); background: #05070a; color: var(--stellar-gold); border-radius: 2px; outline: none; font-family: 'Orbitron', sans-serif; }
+    button { cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Orbitron', sans-serif; transition: 0.3s; border: none; border-radius: 2px; letter-spacing: 1px; }
+    
+    .primary-btn { background: linear-gradient(135deg, var(--cosmic-purple), #4b0082); color: white; width: 100%; height: 50px; box-shadow: 0 0 15px rgba(138, 43, 226, 0.3); }
+    .primary-btn:hover { filter: brightness(1.3); box-shadow: 0 0 25px rgba(138, 43, 226, 0.5); }
+    .primary-btn:disabled { background: #1a1a1a; color: #444; box-shadow: none; cursor: not-allowed; }
 
     .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 50px; }
-    #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+    #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
 
+    /* 방 인스턴스 높이 고정 (300px) */
     .pvp-room { 
-      background: #251e1a; padding: 25px; border-radius: 10px; border: 2px solid var(--border-metal); 
+      background: #080a0f; padding: 25px; border: 1px solid var(--border-void); 
       height: 300px; display: flex; flex-direction: column; justify-content: space-between; position: relative;
+      transition: border 0.3s;
     }
-    .pvp-room.battle-active { border-color: var(--fire-red); animation: flame-pulse 1.5s infinite; background: #2d1610; }
-    @keyframes flame-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); } 50% { box-shadow: 0 0 35px rgba(255, 69, 0, 0.6); } }
+    /* 전투 중 성운 펄스 효과 */
+    .pvp-room.battle-active { border-color: var(--nebula-blue); animation: nebula-pulse 2s infinite alternate; background: #0a0d17; }
+    @keyframes nebula-pulse { 0% { box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); } 100% { box-shadow: 0 0 30px rgba(0, 180, 216, 0.5); } }
 
-    .room-top { display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); height: 20px; }
+    .room-top { display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-dim); height: 20px; }
     
-    .pvp-slots { display: flex; align-items: center; gap: 15px; height: 100px; margin: 10px 0; }
+    .pvp-slots { display: flex; align-items: center; gap: 20px; height: 100px; margin: 10px 0; }
     .pvp-player { 
-      flex: 1; height: 85px; border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-      font-weight: bold; font-size: 1rem; border: 1px solid transparent; overflow: hidden; cursor: pointer;
+      flex: 1; height: 85px; border-radius: 2px; display: flex; align-items: center; justify-content: center; 
+      font-weight: bold; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; cursor: pointer; transition: 0.3s;
     }
-    .player-name { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; }
+    .player-name { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; font-family: 'Cinzel', serif; }
     
-    .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
-    .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); }
-    .slot-ready { background: rgba(255, 215, 0, 0.2); border: 2px solid var(--gold); color: var(--gold); box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3); }
+    .slot-empty { background: var(--slot-void); color: #333; border: 1px dashed #1a1a1a; }
+    .slot-occupied { background: var(--slot-energy); border: 1px solid var(--cosmic-purple); color: var(--stellar-gold); }
+    .slot-ready { 
+      background: rgba(0, 212, 255, 0.1); 
+      border: 1px solid var(--nebula-blue); 
+      color: var(--nebula-blue); 
+      box-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
+    }
 
-    .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.6rem; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+    .vs-text { font-family: 'Cinzel', serif; color: var(--cosmic-purple); font-weight: bold; font-size: 1.4rem; text-shadow: 0 0 10px var(--cosmic-purple); }
 
     .room-actions { height: 60px; display: flex; align-items: flex-end; }
     .btn-group { display: flex; gap: 10px; width: 100%; height: 45px; }
-    .btn-group button { flex: 1; font-size: 0.85rem; height: 100%; }
-    .leave-btn { background: #444; color: #fff; }
+    .btn-group button { flex: 1; font-size: 0.75rem; height: 100%; }
+    .leave-btn { background: #1a1a1a; color: var(--text-dim); border: 1px solid var(--border-void); }
+    .leave-btn:hover { background: #252525; color: #fff; }
 
-    #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.5); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+    /* 슈퍼노바 플래시 */
+    #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
   </style>
 </head>
 <body>
@@ -86,45 +105,45 @@
 
 <div class="main-wrapper">
   <header>
-    <h1>GIBRALTAR ARENA</h1>
-    <span class="location-tag">⚔️ Battlefield: Gibraltar EPL ⚔️</span>
+    <h1>COSMIC OBELISK</h1>
+    <span class="location-tag">✨ Gibraltar Celestial Sector ✨</span>
   </header>
 
   <div class="layout-container">
     <div class="side-panel">
-      <div id="status">CONNECTING...</div>
+      <div id="status">SYNCHRONIZING...</div>
       <div class="card guide-box">
-        <span class="guide-title">📜 ARENA RULES</span>
+        <span class="guide-title">📜 OBSIDIAN LAWS</span>
         <div class="guide-text">
-          1. Register ID and head to <b>'Gibraltar EPL'</b>.<br><br>
-          2. Teleport to the zone to <b>BATTLE</b>.<br><br>
-          3. Find your <b>MATCHING PARTNER</b>.
+          1. Forge your identity and enter the <b>Celestial Sector</b>.<br><br>
+          2. Transmit your energy to a slot to <b>CONVERGE</b>.<br><br>
+          3. When two souls align, <b>REALITY WARPS</b>.
         </div>
       </div>
     </div>
 
     <div class="main-content">
       <div id="reg-section" class="card profile-card" style="display:none;">
-        <div class="nick-container">
-          <span class="guide-title">ENTER THE GATES</span>
-          <input type="text" id="avatarId" placeholder="YOUR WARRIOR NAME" maxlength="12" />
+        <div class="nick-container" style="height:100%; display:flex; flex-direction:column; justify-content:center;">
+          <span class="guide-title">IDENTITY FORGING</span>
+          <input type="text" id="avatarId" placeholder="SOUL NAME" maxlength="12" />
           <div class="btn-row">
-            <button class="primary-btn" id="registerBtn">CLAIM IDENTITY</button>
+            <button class="primary-btn" id="registerBtn">CLAIM SOUL</button>
           </div>
         </div>
       </div>
 
       <div id="lobby-section" style="display:none;">
         <div class="card profile-card">
-          <div id="nick-display-mode" class="nick-container">
-            <span style="font-size:0.8rem; color:var(--text-dim); margin-bottom:5px;">Current Warrior</span>
+          <div id="nick-display-mode" style="height:100%; display:flex; flex-direction:column; justify-content:center;">
+            <span style="font-size:0.7rem; color:var(--text-dim); margin-bottom:8px; font-family:'Orbitron'; letter-spacing:2px;">CURRENT SOUL</span>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span id="displayNick" style="font-family:'Cinzel'; color:var(--gold); font-size:1.8rem; font-weight:bold;">-</span>
-              <button onclick="toggleRename(true)" style="background:transparent; color:var(--fire-orange); border:1px solid var(--fire-orange); padding:5px 12px; font-size:0.8rem;">RENAME</button>
+              <span id="displayNick" style="font-family:'Cinzel'; color:#fff; font-size:2rem; font-weight:bold; letter-spacing:2px;">-</span>
+              <button onclick="toggleRename(true)" style="background:transparent; color:var(--nebula-blue); border:1px solid var(--nebula-blue); padding:6px 15px; font-size:0.7rem;">REWRITE</button>
             </div>
           </div>
-          <div id="nick-edit-mode" class="nick-container" style="display:none;">
-            <input type="text" id="newNickInput" placeholder="NEW NAME" maxlength="12" />
+          <div id="nick-edit-mode" style="display:none; height:100%; flex-direction:column; justify-content:center;">
+            <input type="text" id="newNickInput" placeholder="NEW SOUL NAME" maxlength="12" />
             <div class="btn-row">
               <button class="primary-btn" onclick="applyNewNick()" style="height:45px;">CONFIRM</button>
               <button onclick="toggleRename(false)" class="leave-btn" style="width:100px; height:45px;">CANCEL</button>
@@ -134,8 +153,8 @@
 
         <div class="card">
           <div class="arena-header">
-            <span class="guide-title" style="margin:0">ACTIVE DUELS</span>
-            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:0 25px; height:45px; font-size:0.85rem;">+ NEW DUEL</button>
+            <span class="guide-title" style="margin:0">CELESTIAL CONVERGENCE</span>
+            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:0 30px; height:45px; font-size:0.8rem;">+ SUMMON OBELISK</button>
           </div>
           <div id="roomContainer"></div>
         </div>
@@ -164,9 +183,9 @@
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
-    if (type === 'sword') { osc.type = 'triangle'; osc.frequency.setValueAtTime(1200, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
-    else if (type === 'fire') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.5); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
-    else if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+    if (type === 'sword') { osc.type = 'triangle'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+    else if (type === 'fire') { osc.type = 'sine'; osc.frequency.setValueAtTime(50, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.8); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8); osc.start(); osc.stop(audioCtx.currentTime + 0.8); }
+    else if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(300, audioCtx.currentTime); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
   }
 
   const getNick = () => localStorage.getItem('nickname');
@@ -187,7 +206,7 @@
   initUI();
 
   db.ref(".info/connected").on("value", snap => {
-    document.getElementById('status').innerText = snap.val() ? "🔥 ARENA ONLINE 🔥" : "❄️ OFFLINE ❄️";
+    document.getElementById('status').innerText = snap.val() ? "📡 SECTOR LINKED" : "❌ LINK LOST";
   });
 
   db.ref('rooms').on('value', snapshot => {
@@ -212,14 +231,14 @@
       div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
         <div class="room-top">
-          <span>#${id.slice(-4)}</span>
-          <span style="color:${isInBattle?'var(--fire-red)':'var(--text-dim)'}">${isInBattle?'⚔️ IN COMBAT':'🛡️ WAITING'}</span>
+          <span>ID: ${id.slice(-4)}</span>
+          <span style="color:${isInBattle?'var(--nebula-blue)':'var(--text-dim)'}">${isInBattle?'WARP ACTIVE':'STABLE'}</span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${p1==='EMPTY'?'slot-empty':(room.p1Ready?'slot-ready':'slot-occupied')}" onclick="tryJoin('${id}', 'p1')">
             <span class="player-name">${p1}</span>
           </div>
-          <div class="vs-text">VS</div>
+          <div class="vs-text">✦</div>
           <div class="pvp-player ${p2==='EMPTY'?'slot-empty':(room.p2Ready?'slot-ready':'slot-occupied')}" onclick="tryJoin('${id}', 'p2')">
             <span class="player-name">${p2}</span>
           </div>
@@ -228,8 +247,8 @@
           ${myRole ? `
             <div class="btn-group">
               ${(!isInBattle && p1!=='EMPTY' && p2!=='EMPTY') ? 
-                `<button class="primary-btn" onclick="toggleReady('${id}', '${myRole}')" style="${amIReady ? 'background:var(--gold); color:#000;' : ''}">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-              <button class="leave-btn" onclick="handleRetreat('${id}', '${room.status}')">RETREAT ${isInBattle ? '(RESET)' : ''}</button>
+                `<button class="primary-btn" onclick="toggleReady('${id}', '${myRole}')" style="${amIReady ? 'background:var(--nebula-blue); color:#000;' : ''}">${amIReady ? 'ABORT' : 'RESONATE'}</button>` : ''}
+              <button class="leave-btn" onclick="handleRetreat('${id}', '${room.status}')">${isInBattle ? 'RESET' : 'DISCONNECT'}</button>
             </div>
           ` : ''}
         </div>
@@ -243,9 +262,9 @@
 
   function triggerFlash() {
     const flash = document.getElementById('flash-overlay');
-    flash.style.opacity = '1';
+    flash.style.opacity = '0.3'; // 눈부심 방지
     setTimeout(() => flash.style.opacity = '0', 150);
-    playSound('fire'); setTimeout(() => playSound('sword'), 100);
+    playSound('fire');
   }
 
   window.tryJoin = (rid, slot) => {
@@ -263,7 +282,7 @@
   };
 
   window.toggleReady = (rid, role) => {
-    playSound('fire');
+    playSound('click');
     db.ref('rooms/' + rid).transaction(r => {
       if(r) {
         if(role==='p1') r.p1Ready = !r.p1Ready; else r.p2Ready = !r.p2Ready;
@@ -274,22 +293,12 @@
     });
   };
 
-  // 🛡️ 수정된 RETREAT 로직: 전투 중이면 상태 리셋, 대기 중이면 퇴장
   window.handleRetreat = (rid, status) => { 
     playSound('click');
-    
     if (status === 'BATTLE') {
-      // 전투 중일 때는 상태만 리셋
-      db.ref('rooms/' + rid).update({
-        status: 'WAITING',
-        p1Ready: false,
-        p2Ready: false,
-        lastUpdate: Date.now()
-      });
+      db.ref('rooms/' + rid).update({ status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() });
       return;
     }
-
-    // 대기 중일 때는 기존 퇴장 로직 수행
     db.ref('rooms/'+rid).transaction(r => { 
       if(r) { 
         if(r.p1===getNick()) {r.p1='EMPTY'; r.p1Ready=false;} 
@@ -313,9 +322,7 @@
 
   document.getElementById('createRoomBtn').onclick = () => { 
     playSound('click'); 
-    db.ref('rooms/room_'+Date.now()).set({ 
-      p1: getNick(), p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() 
-    }); 
+    db.ref('rooms/room_'+Date.now()).set({ p1: getNick(), p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() }); 
   };
 
   document.getElementById('registerBtn').onclick = () => { 
