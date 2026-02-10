@@ -13,26 +13,24 @@
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-    .container { max-width: 500px; margin: auto; width: 100%; background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid #30363d; flex-grow: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .container { max-width: 500px; margin: auto; width: 100%; background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid #30363d; flex-grow: 1; }
     header { text-align: center; margin-bottom: 20px; }
     h1 { color: var(--blue-accent); margin: 0; font-size: 1.6rem; text-transform: uppercase; }
     .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); display: inline-block; padding: 2px 15px; border-radius: 20px; margin-top: 8px; }
     
-    input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; transition: all 0.2s; }
+    input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; }
     button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:active { transform: scale(0.98); filter: brightness(1.2); }
-    button:disabled { background: #21262d !important; color: #484f58 !important; cursor: not-allowed; }
+    button:disabled { background: #21262d !important; color: #484f58 !important; cursor: not-allowed; opacity: 0.5; }
     
-    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); transition: opacity 0.5s; }
+    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); }
     
     .pvp-room { background: #21262d; margin: 15px 0; padding: 15px; border-radius: 10px; border: 1px solid #444c56; }
     .room-info { font-size: 0.75rem; color: var(--epl-gold); margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; }
     .pvp-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .pvp-player { flex: 1; height: 65px; background: #0d1117; border-radius: 8px; text-align: center; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; position: relative; overflow: hidden; }
-    .pvp-player.ready { border-color: var(--green-btn); box-shadow: inset 0 0 10px rgba(35, 134, 54, 0.3); }
+    .pvp-player { flex: 1; height: 65px; background: #0d1117; border-radius: 8px; text-align: center; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+    .pvp-player.ready { border-color: var(--green-btn); }
     .pvp-player.ready::after { content: "READY"; font-size: 0.6rem; color: var(--green-btn); margin-top: 4px; }
     .pvp-player.waiting { color: #484f58; border: 2px dashed #484f58; }
-    .vs-label { font-weight: bold; color: var(--red-btn); font-style: italic; font-size: 1.2rem; }
     
     .btn-group { display: flex; gap: 8px; }
     .start-btn { background: var(--blue-accent); color: #000; flex: 2; }
@@ -83,7 +81,7 @@
   const db = firebase.database();
 
   const getNick = () => localStorage.getItem('nickname');
-  const getMyRoom = () => localStorage.getItem('my_room_id');
+  let currentRoomId = null; // 현재 참여 중인 방 ID 실시간 관리
 
   if (getNick()) {
     document.getElementById('reg-section').style.display = 'none';
@@ -91,49 +89,46 @@
   }
 
   db.ref(".info/connected").on("value", (snap) => {
-    const nick = getNick();
     const statusEl = document.getElementById('status');
-    if (snap.val()) {
-      statusEl.innerHTML = `✅ Server Online | <b>${nick || 'Guest'}</b>`;
-      statusEl.style.opacity = "1";
-    } else {
-      statusEl.innerHTML = `❌ Offline | Reconnecting...`;
-    }
+    statusEl.innerHTML = snap.val() ? `✅ Server Online | <b>${getNick() || 'Guest'}</b>` : `❌ Offline`;
   });
 
+  // 방 목록 및 중복 체크 로직
   db.ref('rooms').on('value', (snapshot) => {
     const rooms = snapshot.val() || {};
     const container = document.getElementById('roomContainer');
     container.innerHTML = '';
     const nick = getNick();
-
-    document.getElementById('createRoomBtn').disabled = !!getMyRoom() || !nick;
+    
+    // 내가 현재 어떤 방에 있는지 확인
+    currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
+    
+    // 방에 참여 중이면 생성 버튼 비활성화
+    document.getElementById('createRoomBtn').disabled = !!currentRoomId || !nick;
 
     Object.keys(rooms).forEach(id => {
       const room = rooms[id];
       const p1 = room.p1 || 'EMPTY', p2 = room.p2 || 'EMPTY';
-      const p1Ready = room.p1Ready || false;
-      const p2Ready = room.p2Ready || false;
       const isInBattle = room.status === 'BATTLE';
-      const isFull = (p1 !== 'EMPTY' && p2 !== 'EMPTY');
-      
       const myRole = (p1 === nick) ? 'p1' : (p2 === nick ? 'p2' : null);
-      const amIReady = (myRole === 'p1' ? p1Ready : (myRole === 'p2' ? p2Ready : false));
+      const amIReady = (myRole === 'p1' ? room.p1Ready : room.p2Ready);
 
       const div = document.createElement('div');
       div.className = 'pvp-room';
       div.innerHTML = `
         <div class="room-info">
           <span>ID: ${id.slice(-4)}</span>
-          <span>${isInBattle ? "🔥 IN BATTLE" : (p1Ready || p2Ready ? "⚔️ PREPARING" : "⏳ WAITING")}</span>
+          <span>${isInBattle ? "🔥 BATTLE" : "⏳ WAITING"}</span>
         </div>
         <div class="pvp-slots">
-          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
+          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${room.p1Ready ? 'ready' : ''}" 
+               onclick="tryJoin('${id}', 'p1')">${p1}</div>
           <div class="vs-label">VS</div>
-          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''} ${p2Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
+          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''} ${room.p2Ready ? 'ready' : ''}" 
+               onclick="tryJoin('${id}', 'p2')">${p2}</div>
         </div>
         <div class="btn-group">
-          ${(isFull && !isInBattle && myRole) ? 
+          ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? 
             `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
               ${amIReady ? 'READY CANCEL' : 'START MATCH'}
             </button>` : ''}
@@ -144,49 +139,49 @@
     });
   });
 
-  // 2인 동의 시작 로직 (READY 토글)
-  window.toggleReady = (roomId, role) => {
-    const roomRef = db.ref('rooms/' + roomId);
-    roomRef.transaction((room) => {
-      if (room) {
-        // 내 상태 뒤집기
-        if (role === 'p1') room.p1Ready = !room.p1Ready;
-        if (role === 'p2') room.p2Ready = !room.p2Ready;
+  // 방 생성
+  document.getElementById('createRoomBtn').onclick = function() {
+    const nick = getNick();
+    if (!nick || currentRoomId) return; // 이미 방에 있으면 차단
+    
+    this.disabled = true;
+    const roomId = "room_" + Date.now();
+    db.ref('rooms/' + roomId).set({ 
+      p1: nick, p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false 
+    });
+  };
 
-        // 둘 다 READY면 BATTLE 진입
-        if (room.p1Ready && room.p2Ready) {
-          room.status = 'BATTLE';
-        }
+  // 슬롯 입장 및 이동 (중복 방지 핵심)
+  window.tryJoin = (roomId, slot) => {
+    const nick = getNick();
+    if (!nick) return;
+
+    // 1. 이미 다른 방에 있으면 입장 불가 (단, 내가 이미 있는 방 내에서의 이동은 허용)
+    if (currentRoomId && currentRoomId !== roomId) {
+      alert("You are already in another room!");
+      return;
+    }
+
+    db.ref('rooms/' + roomId).transaction((room) => {
+      if (room && room.status !== 'BATTLE') {
+        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return; // 자리가 찼으면 무시
+        
+        // 같은 방 안에서 자리 옮기기 처리
+        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
+        if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
+        
+        room[slot] = nick;
       }
       return room;
     });
   };
 
-  document.getElementById('registerBtn').onclick = () => {
-    const val = document.getElementById('avatarId').value.trim();
-    if (val) { localStorage.setItem('nickname', val); location.reload(); }
-  };
-
-  document.getElementById('createRoomBtn').onclick = function() {
-    const nick = getNick();
-    if (!nick || getMyRoom()) return;
-    this.disabled = true;
-    const roomId = "room_" + Date.now();
-    db.ref('rooms/' + roomId).set({ 
-      p1: nick, p2: 'EMPTY', status: 'WAITING', 
-      p1Ready: false, p2Ready: false 
-    }).then(() => localStorage.setItem('my_room_id', roomId));
-  };
-
-  window.tryJoin = (roomId, slot) => {
-    const nick = getNick();
-    if (!nick) return;
+  window.toggleReady = (roomId, role) => {
     db.ref('rooms/' + roomId).transaction((room) => {
-      if (room && room.status !== 'BATTLE') {
-        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return;
-        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
-        if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
-        room[slot] = nick;
+      if (room) {
+        if (role === 'p1') room.p1Ready = !room.p1Ready;
+        if (role === 'p2') room.p2Ready = !room.p2Ready;
+        if (room.p1Ready && room.p2Ready) room.status = 'BATTLE';
       }
       return room;
     });
@@ -199,32 +194,24 @@
       if (!room) return;
       const other = (room.p1 === nick) ? room.p2 : room.p1;
       if (!other || other === 'EMPTY') {
-        db.ref('rooms/' + roomId).remove().then(() => localStorage.removeItem('my_room_id'));
+        db.ref('rooms/' + roomId).remove();
       } else {
         let updates = { status: 'WAITING' };
         if (room.p1 === nick) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; }
         if (room.p2 === nick) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; }
-        db.ref('rooms/' + roomId).update(updates).then(() => localStorage.removeItem('my_room_id'));
+        db.ref('rooms/' + roomId).update(updates);
       }
     });
   };
 
-  // 눈이 편안한 소프트 리셋 (깜빡임 없음)
+  document.getElementById('registerBtn').onclick = () => {
+    const val = document.getElementById('avatarId').value.trim();
+    if (val) { localStorage.setItem('nickname', val); location.reload(); }
+  };
+
   document.getElementById('softResetBtn').onclick = function() {
-    const btn = this;
-    const statusEl = document.getElementById('status');
-    
-    btn.disabled = true;
-    statusEl.style.opacity = "0.3";
-    statusEl.innerText = "🔄 Refreshing data...";
-    
     db.goOffline();
-    setTimeout(() => {
-      db.goOnline();
-      statusEl.style.opacity = "1";
-      btn.disabled = false;
-      // location.reload() 대신 데이터만 다시 붙여넣음
-    }, 800);
+    setTimeout(() => { db.goOnline(); }, 500);
   };
 </script>
 </body>
