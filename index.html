@@ -52,22 +52,16 @@
     .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
     .btn-create:disabled { background: #333; cursor: not-allowed; }
 
-    /* Room Cards */
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; overflow: hidden; transition: transform 0.2s; }
-    .room-card:hover { transform: translateY(-3px); }
-    
+    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; overflow: hidden; }
     .room-id { font-size: 0.65rem; color: #555; position: absolute; top: 10px; left: 15px; font-weight: 800; }
 
-    /* --- Status Labels Enhancements --- */
-    .room-status { 
-      position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-bottom-left-radius: 4px;
-    }
+    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-bottom-left-radius: 4px; }
     .status-waiting-label { background: var(--status-waiting); color: #aaa; animation: pulse-gray 2s infinite; }
     .status-battle-label { background: var(--status-battle); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); animation: pulse-red 1.5s infinite; }
 
-    @keyframes pulse-gray { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-    @keyframes pulse-red { 0% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } 50% { box-shadow: 0 0 15px rgba(255, 62, 62, 0.9); } 100% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } }
+    @keyframes pulse-gray { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } 50% { box-shadow: 0 0 15px rgba(255, 62, 62, 0.9); } }
 
     .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
     .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
@@ -177,6 +171,8 @@
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
+        
+        // 🛡️ 유령 데이터 즉시 처단 (프론트엔드 방어)
         if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') || !r.p1) {
           db.ref(`rooms/${id}`).remove();
           return;
@@ -222,18 +218,24 @@
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
         r[slot] = avatar;
+        r.status = 'WAITING';
       }
       return r;
     });
   };
 
+  // 🛡️ [핵심] 퇴장 시 데이터가 비면 null을 반환하여 방을 자동 삭제
   window.leave = (rid) => {
     const avatar = getAvatar();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null;
+        
+        // 만약 둘 다 비어있다면 null을 반환 -> Firebase에서 해당 방 노드를 삭제함
+        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') {
+          return null; 
+        }
         r.status = 'WAITING';
       }
       return r;
