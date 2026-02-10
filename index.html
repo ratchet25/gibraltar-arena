@@ -23,12 +23,16 @@
     .btn-create { background:var(--accent-red); border:none; color:white; padding:10px 20px; font-family:'Cinzel', serif; font-weight:900; cursor:pointer; border-radius:4px; }
     .btn-create:disabled { background:#333; color:#555; cursor:not-allowed; opacity:0.5; }
     .room-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }
-    .room-card { background:var(--card-bg); border:1px solid var(--border-color); padding:25px 20px 20px; position:relative; }
+    .room-card { background:var(--card-bg); border:1px solid var(--border-color); padding:35px 20px 20px; position:relative; }
+    
+    /* 방 이름(ID) 스타일 */
+    .room-id-label { position:absolute; top:12px; left:15px; font-size:0.6rem; color:#444; font-weight:800; letter-spacing:1px; }
+    
     .room-status { position:absolute; top:0; right:0; padding:4px 12px; font-size:0.65rem; font-weight:900; border-bottom-left-radius:4px; }
     .status-waiting-label { background:#333; color:#888; }
     .status-battle-label { background:var(--accent-red); color:#fff; box-shadow:0 0 10px rgba(255, 62, 62, 0.5); }
     .duel-area { display:flex; align-items:center; justify-content:center; gap:15px; margin:25px 0; }
-    .player-slot { flex:1; height:65px; background:#000; border:1px dashed #333; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; transition:0.3s; color:#444; }
+    .player-slot { flex:1; height:65px; background:#000; border:1px dashed #333; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; transition:0.3s; color:#444; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 5px; }
     .player-slot.occupied { border:1px solid var(--accent-gold); color:var(--accent-gold); font-weight:800; font-family:'Cinzel', serif; }
     .player-slot.ready { background:rgba(255, 183, 3, 0.15); border-style:solid; }
     .btn-room { flex:1; padding:8px; border:none; font-weight:800; font-family:'Cinzel', serif; font-size:0.7rem; cursor:pointer; }
@@ -126,10 +130,13 @@
 
         const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
+        // 방 ID의 앞 5글자만 추출하여 표시 (사진 느낌)
+        const shortId = id.substring(0, 5).toUpperCase();
 
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
+          <div class="room-id-label">#${shortId}</div>
           <div class="room-status ${isBattle?'status-battle-label':'status-waiting-label'}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
             <div class="player-slot ${!isP1Empty?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${isP1Empty?'EMPTY':r.p1}</div>
@@ -148,11 +155,10 @@
     });
   }
 
-  // 중복 제거와 이동을 한 번에 처리하는 핵심 함수
   async function cleanupAndJoin(avatar, targetRid, targetSlot) {
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
-      if (rid === targetRid) return; // 현재 들어가려는 방은 나중에 트랜잭션에서 처리
+      if (rid === targetRid) return;
       const room = allRoomsData[rid];
       let updates = {};
       let changed = false;
@@ -164,7 +170,6 @@
 
     return db.ref(`rooms/${targetRid}`).transaction(r => {
       if (r) {
-        // 방 내부 이동 처리
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
         r[targetSlot] = avatar;
@@ -209,7 +214,6 @@
 
   async function createRoom() {
     const avatar = getAvatar();
-    // 방 만들기 전 다른 모든 방에서 나를 제거
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
       const room = allRoomsData[rid];
