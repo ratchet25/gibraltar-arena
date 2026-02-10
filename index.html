@@ -23,13 +23,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-    body { 
-      background-color: var(--bg-color); 
-      color: var(--text-main); 
-      font-family: 'Inter', sans-serif; 
-      display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px;
-    }
-
+    body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px; }
     header { text-align: center; margin-bottom: 50px; }
     header h1 { font-family: 'Cinzel', serif; font-size: 2.8rem; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; }
     header p { color: var(--accent-red); font-size: 0.9rem; letter-spacing: 4px; font-weight: 800; margin-top: -5px; }
@@ -37,44 +31,35 @@
     .main-container { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
     @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
 
-    .sidebar { display: flex; flex-direction: column; gap: 20px; }
-    .status-badge { background: #000; border-left: 4px solid var(--accent-gold); padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); }
     .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 25px; }
-    .sidebar h4 { font-family: 'Cinzel', serif; color: var(--accent-gold); margin-bottom: 15px; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-    .rules-list { font-size: 0.85rem; color: var(--text-dim); list-style: none; }
-    .rules-list li { margin-bottom: 15px; }
-
+    .status-badge { background: #000; border-left: 4px solid var(--accent-gold); padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 20px;}
+    
     .avatar-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
     .avatar-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
-    .btn-reset { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 6px 12px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
-    .btn-reset:hover { border-color: var(--accent-red); color: var(--accent-red); }
+    .btn-reset { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 6px 12px; cursor: pointer; font-size: 0.7rem; }
 
-    .lobby-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
-    .btn-create:disabled { background: #333; cursor: not-allowed; }
+    .btn-create:disabled { background: #333; color: #555; cursor: not-allowed; opacity: 0.6; }
 
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; overflow: hidden; }
-    .room-id { font-size: 0.65rem; color: #555; position: absolute; top: 10px; left: 15px; font-weight: 800; }
-
-    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-bottom-left-radius: 4px; }
-    .status-waiting-label { background: var(--status-waiting); color: #aaa; animation: pulse-gray 2s infinite; }
-    .status-battle-label { background: var(--status-battle); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); animation: pulse-red 1.5s infinite; }
-
-    @keyframes pulse-gray { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } 50% { box-shadow: 0 0 15px rgba(255, 62, 62, 0.9); } }
+    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; }
+    
+    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; }
+    .status-waiting-label { background: var(--status-waiting); color: #aaa; animation: pulse 2s infinite; }
+    .status-battle-label { background: var(--status-battle); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
-    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; transition: 0.3s; color: #555; }
+    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; }
     .player-slot.occupied { border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; font-family: 'Cinzel', serif; }
-    .player-slot.ready { background: rgba(255, 183, 3, 0.1); border-style: solid; box-shadow: inset 0 0 15px rgba(255,183,3,0.2); }
-    .vs-divider { color: var(--accent-red); font-weight: 900; font-size: 1.2rem; font-family: 'Cinzel', serif; }
+    .player-slot.ready { background: rgba(255, 183, 3, 0.15); border-style: solid; box-shadow: inset 0 0 10px rgba(255,183,3,0.3); }
 
-    .room-actions { display: flex; gap: 10px; }
-    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; border-radius: 2px; }
-
-    #auth-section { max-width: 440px; width: 100%; margin-top: 50px; }
-    input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.1rem; font-family: 'Cinzel', serif; }
+    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; }
+    .btn-ready { background: var(--accent-gold); color: #000; }
+    .btn-retreat { background: #333; color: #ccc; }
+    
+    #auth-section { max-width: 400px; width: 100%; text-align: center; }
+    input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: #fff; margin-bottom: 10px; text-align: center; font-family: 'Cinzel'; }
   </style>
 </head>
 <body>
@@ -85,7 +70,7 @@
   </header>
 
   <div id="auth-section" class="card" style="display:none;">
-    <input type="text" id="avatarInput" placeholder="ENTER E2V1 AVATAR NAME" maxlength="12">
+    <input type="text" id="avatarInput" placeholder="ENTER WARRIOR NAME" maxlength="12">
     <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
 
@@ -93,26 +78,22 @@
     <div class="sidebar">
       <div id="status" class="status-badge">⚡ ARENA CONNECTED</div>
       <div class="card">
-        <h4>ARENA RULES</h4>
-        <ul class="rules-list">
-          <li>1. Forge your name and enter the Gibraltar Arena.</li>
-          <li>2. Enter a slot to challenge or defend.</li>
-          <li>3. When both avatars are READY, the battle begins.</li>
-        </ul>
+        <h4 style="font-family:'Cinzel'; color:var(--accent-gold); margin-bottom:10px;">RULES</h4>
+        <p style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">한 명당 하나의 전장만 입장 가능합니다. 퇴장 시 전장에 아무도 없으면 해당 공간은 소멸합니다.</p>
       </div>
     </div>
 
     <div class="lobby-content">
       <div class="avatar-profile card">
         <div class="avatar-info">
-          <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Current Avatar</span>
+          <span style="font-size: 0.6rem; color: var(--text-dim);">WARRIOR</span>
           <h2 id="avatarDisplay">-</h2>
         </div>
         <button class="btn-reset" onclick="forceReset()">RESET PROFILE</button>
       </div>
 
-      <div class="lobby-header">
-        <h3 style="font-family:'Cinzel'; color:var(--accent-red); letter-spacing: 2px;">ACTIVE DUELS</h3>
+      <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
+        <h3 style="font-family:'Cinzel'; color:var(--accent-red);">ACTIVE DUELS</h3>
         <button id="createRoomBtn" class="btn-create" onclick="createRoom()">+ NEW ROOM</button>
       </div>
 
@@ -122,7 +103,7 @@
 
 <script>
   let db;
-  const getAvatar = () => localStorage.getItem('arena_avatar') || null;
+  const getAvatar = () => localStorage.getItem('arena_avatar');
 
   window.onload = function() {
     const firebaseConfig = { 
@@ -132,11 +113,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
-    
-    db.ref(".info/connected").on("value", s => {
-      document.getElementById('status').innerText = s.val() ? "⚡ ARENA CONNECTED" : "⛓️ DISCONNECTED";
-    });
-
     checkAuth();
   };
 
@@ -164,39 +140,40 @@
     db.ref('rooms').on('value', snap => {
       const rooms = snap.val() || {};
       const container = document.getElementById('roomContainer');
-      const currentAvatar = getAvatar();
+      const avatar = getAvatar();
       container.innerHTML = '';
       
-      const inRoom = Object.keys(rooms).find(id => rooms[id].p1 === currentAvatar || rooms[id].p2 === currentAvatar);
-      document.getElementById('createRoomBtn').disabled = !!inRoom;
+      // 1. 현재 유저가 어느 방에라도 있는지 확인 (동시 입장 차단용)
+      const myRoomId = Object.keys(rooms).find(id => rooms[id].p1 === avatar || rooms[id].p2 === avatar);
+      document.getElementById('createRoomBtn').disabled = !!myRoomId;
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
         
-        // 🛡️ 비정상적인 방(둘다 비었거나 p1이 없는 경우) 즉시 삭제
-        if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') || !r.p1 || r.p1 === 'undefined') {
+        // 🛡️ 유령 방 자동 삭제 로직 강화 (null 처리)
+        if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY')) {
           db.ref(`rooms/${id}`).remove();
           return;
         }
 
+        const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
-        const statusClass = isBattle ? 'status-battle-label' : 'status-waiting-label';
-        const myRole = (r.p1 === currentAvatar) ? 'p1' : (r.p2 === currentAvatar ? 'p2' : null);
 
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
-          <div class="room-id">#${id.slice(-4)}</div>
-          <div class="room-status ${statusClass}">${r.status || 'WAITING'}</div>
+          <div class="room-status ${isBattle?'status-battle-label':'status-waiting-label'}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
-            <div class="player-slot ${(r.p1 && r.p1!=='EMPTY')?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${r.p1 || 'EMPTY'}</div>
-            <div class="vs-divider">VS</div>
-            <div class="player-slot ${(r.p2 && r.p2!=='EMPTY')?'occupied':''} ${r.p2Ready?'ready':''}" onclick="join('${id}','p2')">${r.p2 || 'EMPTY'}</div>
+            <div class="player-slot ${r.p1!=='EMPTY'?'occupied':''} ${r.p1Ready?'ready':''}" 
+                 onclick="${!myRoomId ? `join('${id}','p1')` : ''}">${r.p1 || 'EMPTY'}</div>
+            <div style="color:var(--accent-red); font-weight:900;">VS</div>
+            <div class="player-slot ${r.p2!=='EMPTY'?'occupied':''} ${r.p2Ready?'ready':''}" 
+                 onclick="${!myRoomId ? `join('${id}','p2')` : ''}">${r.p2 || 'EMPTY'}</div>
           </div>
-          <div class="room-actions">
+          <div style="display:flex; gap:10px;">
             ${myRole ? `
-              <button class="btn-room" style="background:var(--accent-gold); color:#000;" onclick="toggleReady('${id}','${myRole}')">${r[myRole+'Ready']?'CANCEL':'READY'}</button>
-              <button class="btn-room" style="background:#333; color:#ccc;" onclick="leave('${id}')">RETREAT</button>
+              <button class="btn-room btn-ready" onclick="toggleReady('${id}','${myRole}')">${r[myRole+'Ready']?'CANCEL':'READY'}</button>
+              <button class="btn-room btn-retreat" onclick="leave('${id}')">RETREAT</button>
             ` : ''}
           </div>
         `;
@@ -207,23 +184,16 @@
 
   function createRoom() {
     const avatar = getAvatar();
-    if(!avatar) return;
+    if (!avatar) return;
     const newRef = db.ref('rooms').push();
     newRef.set({ p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
   window.join = (rid, slot) => {
     const avatar = getAvatar();
-    if(!avatar) return;
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        // 이미 다른 아바타가 점유 중이면 무시 (undefined/null 체크 포함)
-        if (r[slot] !== 'EMPTY' && r[slot] !== avatar && r[slot] != null) return r;
-        
-        // 내가 다른 슬롯에 있었다면 그곳을 비움
-        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        
+        if (r[slot] !== 'EMPTY' && r[slot] !== undefined) return r; // 이미 주인 있음
         r[slot] = avatar;
         r.status = 'WAITING';
       }
@@ -238,13 +208,8 @@
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
         
-        // 🛡️ 모든 종류의 '비어있음' 상태를 체크 (undefined 문자열 포함)
-        const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1 === 'undefined');
-        const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2 === 'undefined');
-
-        if (p1Empty && p2Empty) {
-          return null; // DB에서 노드 완전 삭제
-        }
+        // 🛡️ 핵심: 두 자리가 모두 EMPTY면 null을 리턴하여 방 폭파
+        if ((!r.p1 || r.p1 === 'EMPTY') && (!r.p2 || r.p2 === 'EMPTY')) return null;
         r.status = 'WAITING';
       }
       return r;
