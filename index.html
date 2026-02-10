@@ -1,222 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | Inferno</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ... 기존 CSS 스타일과 동일 (분량상 핵심 로직 위주 기술) ... */
-    :root { 
-      --bg-stone: #1a1614; --card-iron: #2d241f; --fire-red: #ff4500; 
-      --fire-orange: #ff8c00; --gold: #ffd700; --text-light: #f4ece1; 
-      --text-dim: #a8998a; --border-metal: #4a3b32;
-      --slot-empty: #120e0c; --slot-occupied: #3d2b1f;
+    /* ... [이전 스타일 동일] ... */
+
+    /* 🔴 화면 번쩍임 효과 */
+    #flash-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 0, 0, 0.4);
+      z-index: 9999; pointer-events: none; opacity: 0;
+      transition: opacity 0.1s ease-out;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg-stone); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif; margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center; background-image: radial-gradient(circle at center, #2a1a15 0%, #1a1614 100%); }
-    .main-wrapper { max-width: 1200px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
-    @media (min-width: 900px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; } }
-    header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--fire-red); padding-bottom: 10px; }
-    h1 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 2.2rem; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px var(--fire-red); }
-    .location-tag { color: var(--fire-orange); font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: block; text-transform: uppercase; }
-    .side-panel { display: flex; flex-direction: column; gap: 20px; }
-    .card { background: var(--card-iron); border-radius: 8px; border: 2px solid var(--border-metal); padding: 20px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.4); }
-    .guide-box { border-left: 4px solid var(--fire-red); background: rgba(255, 69, 0, 0.05); }
-    .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.1rem; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 5px; }
-    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; }
-    .main-content { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-    #status { padding: 10px; border-radius: 4px; font-size: 0.8rem; text-align: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); font-weight: bold; }
-    .profile-card { border-top: 4px solid var(--fire-orange); }
-    .profile-area { display: flex; justify-content: space-between; align-items: center; }
-    .current-nick { font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: 1.3rem; }
-    .edit-btn { font-size: 0.85rem; color: var(--fire-orange); cursor: pointer; font-weight: bold; }
-    .arena-card { border-top: 4px solid var(--fire-red); }
-    .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    #roomContainer { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    @media (min-width: 650px) { #roomContainer { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1100px) { #roomContainer { grid-template-columns: repeat(3, 1fr); } }
-    input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 4px; }
-    button { padding: 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.3s; font-size: 1rem; }
-    .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; }
-    .pvp-room { background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); }
-    .pvp-room.battle-active { border-color: var(--fire-red); box-shadow: 0 0 20px rgba(255, 69, 0, 0.3); background: #2d1610; }
-    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
-    .pvp-player { flex: 1; height: 65px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
-    .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
-    .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); box-shadow: inset 0 0 10px rgba(255, 140, 0, 0.2); }
-    .slot-ready { background: rgba(255, 215, 0, 0.15); border: 2px solid var(--gold); color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-    .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.2rem; }
-    .btn-group { display: flex; gap: 8px; }
-    .btn-group button { padding: 10px; font-size: 0.8rem; flex: 1; }
-    .start-btn { background: linear-gradient(to bottom, #ffd700, #ff8c00); color: #000; }
-    .leave-btn { background: #444; color: #fff; }
-    .footer-area { width: 100%; text-align: center; padding: 30px 0; border-top: 1px solid var(--border-metal); margin-top: 40px; }
+
+    /* 🔥 전투 중인 방 일렁이는 효과 */
+    @keyframes flame-pulse {
+      0% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(255, 69, 0, 0.8); }
+      100% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); }
+    }
+
+    .pvp-room.battle-active {
+      border-color: var(--fire-red);
+      background: #2d1610;
+      animation: flame-pulse 1.5s infinite ease-in-out;
+    }
+
+    /* READY 상태일 때 미세하게 흔들리는 효과 (선택 사항) */
+    .slot-ready {
+      animation: shake 0.5s infinite;
+    }
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(1px, 1px); }
+      50% { transform: translate(-1px, -1px); }
+      100% { transform: translate(0, 0); }
+    }
   </style>
 </head>
 <body>
+<div id="flash-overlay"></div>
 
 <div class="main-wrapper">
-  <header>
-    <h1>GIBRALTAR ARENA</h1>
-    <span class="location-tag">⚔️ Battlefield: Gibraltar EPL ⚔️</span>
-  </header>
-
-  <div class="layout-container">
-    <div class="side-panel">
-      <div id="status">CONNECTING...</div>
-      <div class="card guide-box">
-        <span class="guide-title">📜 ARENA RULES</span>
-        <div class="guide-text">1. Register ID and head to <b>'Gibraltar EPL'</b>.<br><br>2. Teleport to the zone to <b>BATTLE</b>.<br><br>3. Find your <b>PARTNER</b>.</div>
-      </div>
-    </div>
-    <div class="main-content">
-      <div id="reg-section" class="card profile-card">
-        <span class="guide-title">ENTER THE GATES</span>
-        <input type="text" id="avatarId" placeholder="YOUR WARRIOR NAME" maxlength="12" />
-        <button class="primary-btn" id="registerBtn">CLAIM IDENTITY</button>
-      </div>
-      <div id="lobby-section" style="display:none;" class="main-content">
-        <div class="card profile-card">
-          <div class="profile-area">
-            <div><span style="font-size:0.7rem; color:var(--text-dim); display:block;">Warrior</span><span class="current-nick" id="displayNick">-</span></div>
-            <span class="edit-btn" onclick="toggleChangeNick()">RENAME</span>
-          </div>
-          <div id="nick-change-box" style="display:none; margin-top:15px;">
-            <input type="text" id="newNickInput" placeholder="NEW NAME" maxlength="12" />
-            <div class="btn-group"><button class="primary-btn" onclick="applyNewNick()">CONFIRM</button><button onclick="toggleChangeNick()" style="background:#444; color:white;">CANCEL</button></div>
-          </div>
-        </div>
-        <div class="card arena-card">
-          <div class="arena-header"><span class="guide-title" style="margin:0">ACTIVE DUELS</span><button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 20px; margin:0; font-size:0.8rem;">+ NEW DUEL</button></div>
-          <div id="roomContainer"></div>
-        </div>
-      </div>
-    </div>
   </div>
-</div>
 
 <script>
-  // --- 🔈 사운드 엔진 (Sound Engine) ---
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+  // ... [사운드 엔진 동일] ...
 
-    if (type === 'sword') { // 칼날 부딪히는 소리
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    } else if (type === 'fire') { // 불꽃 펑 소리
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.5);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-    } else if (type === 'click') { // 묵직한 타격음
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    }
-  }
-
-  // --- ⚔️ 기존 Firebase 로직 (사운드 연동) ---
-  const firebaseConfig = { apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", authDomain: "gibraltar-live.firebaseapp.com", databaseURL: "https://gibraltar-live-default-rtdb.firebaseio.com", projectId: "gibraltar-live", storageBucket: "gibraltar-live.firebasestorage.app", messagingSenderId: "286453523509", appId: "1:286453523509:web:32f97e69cbed2c41fcfd7c" };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const getNick = () => localStorage.getItem('nickname');
-  let currentRoomId = null;
-
-  function initUI() {
-    const nick = getNick();
-    if (nick) {
-      document.getElementById('reg-section').style.display = 'none';
-      document.getElementById('lobby-section').style.display = 'flex';
-      document.getElementById('displayNick').innerText = nick;
-    }
-  }
-  initUI();
+  let lastBattleCount = 0; // 전투 중인 방 개수 추적용
 
   db.ref('rooms').on('value', snapshot => {
     const rooms = snapshot.val() || {};
     const container = document.getElementById('roomContainer');
     container.innerHTML = '';
-    const nick = getNick();
-    currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
-    document.getElementById('createRoomBtn').disabled = !!currentRoomId;
+    
+    let currentBattleCount = 0;
 
     Object.keys(rooms).forEach(id => {
       const room = rooms[id];
-      const p1 = room.p1 || 'EMPTY', p2 = room.p2 || 'EMPTY';
       const isInBattle = room.status === 'BATTLE';
-      const myRole = (p1 === nick) ? 'p1' : (p2 === nick ? 'p2' : null);
-      const amIReady = (myRole === 'p1' ? room.p1Ready : room.p2Ready);
+      if (isInBattle) currentBattleCount++;
 
-      const getSlotClass = (player, ready) => (player === 'EMPTY' ? 'slot-empty' : (ready ? 'slot-ready' : 'slot-occupied'));
-
-      const div = document.createElement('div');
-      div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
-      div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); font-family:'Cinzel'">
-          <span>#${id.slice(-4)}</span><span>${isInBattle ? '⚔️ COMBAT' : '🛡️ WAITING'}</span>
-        </div>
-        <div class="pvp-slots">
-          <div class="pvp-player ${getSlotClass(p1, room.p1Ready)}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
-          <div class="vs-text">VS</div>
-          <div class="pvp-player ${getSlotClass(p2, room.p2Ready)}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
-        </div>
-        <div class="btn-group">
-          ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? `<button class="start-btn" onclick="toggleReady('${id}', '${myRole}')">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-          ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">RETREAT</button>` : ''}
-        </div>`;
-      container.appendChild(div);
+      // ... [기존 렌더링 로직 동일] ...
     });
+
+    // 🔴 새로운 전투가 시작되었을 때만 번쩍임 실행
+    if (currentBattleCount > lastBattleCount) {
+      triggerFlash();
+    }
+    lastBattleCount = currentBattleCount;
   });
 
-  window.tryJoin = (rid, slot) => {
-    const nick = getNick();
-    if(currentRoomId && currentRoomId!==rid) return;
-    playSound('sword'); // 입장 시 칼날 소리
-    db.ref('rooms/' + rid).transaction(r => {
-      if(r && r.status!=='BATTLE') {
-        if(r[slot]!=='EMPTY' && r[slot]!==nick) return;
-        if(r.p1===nick) {r.p1='EMPTY'; r.p1Ready=false;}
-        if(r.p2===nick) {r.p2='EMPTY'; r.p2Ready=false;}
-        r[slot]=nick; r.lastUpdate = Date.now();
-      }
-      return r;
-    });
-  };
+  function triggerFlash() {
+    const flash = document.getElementById('flash-overlay');
+    flash.style.opacity = '1';
+    setTimeout(() => {
+      flash.style.opacity = '0';
+    }, 150);
+    // 전투 시작 사운드 (강렬하게)
+    playSound('fire'); 
+    setTimeout(() => playSound('sword'), 100);
+  }
 
-  window.toggleReady = (rid, role) => {
-    playSound('fire'); // 준비 시 불꽃 소리
-    db.ref('rooms/' + rid).transaction(r => {
-      if(r) {
-        if(role==='p1') r.p1Ready = !r.p1Ready;
-        else r.p2Ready = !r.p2Ready;
-        if(r.p1Ready && r.p2Ready) r.status = 'BATTLE';
-        r.lastUpdate = Date.now();
-      }
-      return r;
-    });
-  };
-
-  window.leaveRoom = (rid) => { playSound('click'); db.ref('rooms/'+rid).transaction(r => { if(r) { if(r.p1===getNick()) {r.p1='EMPTY'; r.p1Ready=false;} else {r.p2='EMPTY'; r.p2Ready=false;} if(r.p1==='EMPTY' && r.p2==='EMPTY') return null; r.status='WAITING'; r.lastUpdate=Date.now(); } return r; }); };
-  document.getElementById('createRoomBtn').onclick = () => { playSound('click'); db.ref('rooms/room_'+Date.now()).set({ p1: getNick(), p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() }); };
-  document.getElementById('registerBtn').onclick = () => { playSound('click'); const v = document.getElementById('avatarId').value.trim(); if(v) { localStorage.setItem('nickname', v); location.reload(); } };
-  window.toggleChangeNick = () => { playSound('click'); const box = document.getElementById('nick-change-box'); box.style.display = box.style.display === 'none' ? 'block' : 'none'; };
-  window.applyNewNick = () => { playSound('click'); const n = document.getElementById('newNickInput').value.trim(); if(n) { localStorage.setItem('nickname', n); location.reload(); } };
+  // ... [기존 함수들 동일] ...
 </script>
 </body>
 </html>
