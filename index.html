@@ -9,7 +9,7 @@
   <style>
     :root { 
       --bg-dark: #0d1117; --bg-panel: #161b22; --blue-accent: #58a6ff; 
-      --green-btn: #238636; --red-btn: #da3633; --text-gray: #8b949e; --epl-gold: #f0883e; 
+      --green-btn: #238636; --red-btn: #da3633; --orange-btn: #d16d00; --text-gray: #8b949e; --epl-gold: #f0883e; 
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
@@ -32,10 +32,11 @@
     .pvp-player.ready::after { content: "READY"; font-size: 0.6rem; color: var(--green-btn); margin-top: 4px; }
     .pvp-player.waiting { color: #484f58; border: 2px dashed #484f58; }
     
-    .btn-group { display: flex; gap: 8px; }
-    .start-btn { background: var(--blue-accent); color: #000; flex: 2; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .start-btn { background: var(--blue-accent); color: #000; flex: 2; min-width: 150px; }
     .start-btn.ready-active { background: var(--green-btn); color: #fff; }
-    .leave-btn { background: var(--red-btn); flex: 1; }
+    .stop-btn { background: var(--orange-btn); flex: 1; min-width: 100px; }
+    .leave-btn { background: var(--red-btn); flex: 1; min-width: 80px; }
 
     .footer-area { padding: 20px 0; text-align: center; border-top: 1px solid #30363d; margin-top: 20px; }
     .reset-btn { background: transparent; color: var(--text-gray); font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; border-radius: 20px; }
@@ -81,7 +82,7 @@
   const db = firebase.database();
 
   const getNick = () => localStorage.getItem('nickname');
-  let currentRoomId = null; // 현재 참여 중인 방 ID 실시간 관리
+  let currentRoomId = null;
 
   if (getNick()) {
     document.getElementById('reg-section').style.display = 'none';
@@ -93,17 +94,13 @@
     statusEl.innerHTML = snap.val() ? `✅ Server Online | <b>${getNick() || 'Guest'}</b>` : `❌ Offline`;
   });
 
-  // 방 목록 및 중복 체크 로직
   db.ref('rooms').on('value', (snapshot) => {
     const rooms = snapshot.val() || {};
     const container = document.getElementById('roomContainer');
     container.innerHTML = '';
     const nick = getNick();
     
-    // 내가 현재 어떤 방에 있는지 확인
     currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
-    
-    // 방에 참여 중이면 생성 버튼 비활성화
     document.getElementById('createRoomBtn').disabled = !!currentRoomId || !nick;
 
     Object.keys(rooms).forEach(id => {
@@ -118,7 +115,7 @@
       div.innerHTML = `
         <div class="room-info">
           <span>ID: ${id.slice(-4)}</span>
-          <span>${isInBattle ? "🔥 BATTLE" : "⏳ WAITING"}</span>
+          <span>${isInBattle ? "🔥 BATTLE IN PROGRESS" : "⏳ WAITING"}</span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${room.p1Ready ? 'ready' : ''}" 
@@ -132,6 +129,7 @@
             `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
               ${amIReady ? 'READY CANCEL' : 'START MATCH'}
             </button>` : ''}
+          ${(myRole && isInBattle) ? `<button class="stop-btn" onclick="stopBattle('${id}')">STOP BATTLE</button>` : ''}
           ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
         </div>
       `;
@@ -139,37 +137,44 @@
     });
   });
 
-  // 방 생성
-  document.getElementById('createRoomBtn').onclick = function() {
-    const nick = getNick();
-    if (!nick || currentRoomId) return; // 이미 방에 있으면 차단
-    
-    this.disabled = true;
-    const roomId = "room_" + Date.now();
-    db.ref('rooms/' + roomId).set({ 
-      p1: nick, p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false 
+  // 배틀만 중지 (방에 남음)
+  window.stopBattle = (roomId) => {
+    db.ref('rooms/' + roomId).update({
+      status: 'WAITING',
+      p1Ready: false,
+      p2Ready: false
     });
   };
 
-  // 슬롯 입장 및 이동 (중복 방지 핵심)
+  // 방에서 완전히 나가기
+  window.leaveRoom = (roomId) => {
+    const nick = getNick();
+    db.ref('rooms/' + roomId).transaction((room) => {
+      if (room) {
+        // 나갈 때 배틀 중이었다면 배틀도 중지시킴
+        if (room.status === 'BATTLE') room.status = 'WAITING';
+        
+        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
+        else if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
+
+        if (room.p1 === 'EMPTY' && room.p2 === 'EMPTY') return null;
+      }
+      return room;
+    });
+  };
+
   window.tryJoin = (roomId, slot) => {
     const nick = getNick();
     if (!nick) return;
-
-    // 1. 이미 다른 방에 있으면 입장 불가 (단, 내가 이미 있는 방 내에서의 이동은 허용)
     if (currentRoomId && currentRoomId !== roomId) {
       alert("You are already in another room!");
       return;
     }
-
     db.ref('rooms/' + roomId).transaction((room) => {
       if (room && room.status !== 'BATTLE') {
-        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return; // 자리가 찼으면 무시
-        
-        // 같은 방 안에서 자리 옮기기 처리
+        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return;
         if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
         if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
-        
         room[slot] = nick;
       }
       return room;
@@ -187,20 +192,12 @@
     });
   };
 
-  window.leaveRoom = (roomId) => {
+  document.getElementById('createRoomBtn').onclick = function() {
     const nick = getNick();
-    db.ref('rooms/' + roomId).once('value', (snap) => {
-      const room = snap.val();
-      if (!room) return;
-      const other = (room.p1 === nick) ? room.p2 : room.p1;
-      if (!other || other === 'EMPTY') {
-        db.ref('rooms/' + roomId).remove();
-      } else {
-        let updates = { status: 'WAITING' };
-        if (room.p1 === nick) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; }
-        if (room.p2 === nick) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; }
-        db.ref('rooms/' + roomId).update(updates);
-      }
+    if (!nick || currentRoomId) return;
+    const roomId = "room_" + Date.now();
+    db.ref('rooms/' + roomId).set({ 
+      p1: nick, p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false 
     });
   };
 
