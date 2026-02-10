@@ -14,73 +14,120 @@
       --text-dim: #a8998a; --border-metal: #4a3b32;
       --slot-empty: #120e0c; --slot-occupied: #3d2b1f;
     }
+    
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg-stone); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif; margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center; background-image: radial-gradient(circle at center, #2a1a15 0%, #1a1614 100%); }
+    body { 
+      background: var(--bg-stone); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif;
+      margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center;
+      background-image: radial-gradient(circle at center, #2a1a15 0%, #1a1614 100%);
+    }
+    
     .main-wrapper { max-width: 1200px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
     @media (min-width: 900px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; } }
+    
     header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--fire-red); padding-bottom: 10px; }
     h1 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 2.2rem; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px var(--fire-red); }
     .location-tag { color: var(--fire-orange); font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: block; text-transform: uppercase; }
+
     .card { background: var(--card-iron); border-radius: 8px; border: 2px solid var(--border-metal); padding: 20px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.4); }
     .guide-box { border-left: 4px solid var(--fire-red); background: rgba(255, 69, 0, 0.05); }
     .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.1rem; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 5px; }
     .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; }
+
     #status { padding: 10px; border-radius: 4px; font-size: 0.8rem; text-align: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); font-weight: bold; margin-bottom: 10px; }
+    
     input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 4px; }
     button { padding: 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.3s; font-size: 1rem; }
     .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; }
-    .pvp-room { background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); margin-bottom: 15px; }
-    .pvp-room.battle-active { border-color: var(--fire-red); animation: flame-pulse 1.5s infinite ease-in-out; }
-    @keyframes flame-pulse { 0% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); } 50% { box-shadow: 0 0 25px rgba(255, 69, 0, 0.8); } 100% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); } }
-    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
-    .pvp-player { flex: 1; height: 65px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
+    .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+    /* 🛡️ 고정된 방 인스턴스 스타일 */
+    .pvp-room { 
+      background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); 
+      min-height: 230px; /* 높이 고정 */
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .pvp-room.battle-active { border-color: var(--fire-red); animation: flame-pulse 1.5s infinite ease-in-out; background: #2d1610; }
+    @keyframes flame-pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); } 50% { box-shadow: 0 0 25px rgba(255, 69, 0, 0.8); } }
+
+    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; height: 70px; }
+    .pvp-player { 
+      flex: 1; height: 65px; border-radius: 4px; display: flex; align-items: center; justify-content: center; 
+      font-weight: bold; font-size: 0.9rem; transition: 0.3s; cursor: pointer;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 5px;
+    }
     .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
     .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); }
     .slot-ready { background: rgba(255, 215, 0, 0.15); border: 2px solid var(--gold); color: var(--gold); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px,1px); } 50% { transform: translate(-1px,-1px); } }
+
     .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.2rem; }
-    .btn-group { display: flex; gap: 8px; }
-    .btn-group button { padding: 10px; font-size: 0.8rem; flex: 1; }
+
+    /* 🛡️ 버튼 영역 고정 */
+    .btn-container { height: 45px; display: flex; align-items: flex-end; }
+    .btn-group { display: flex; gap: 8px; width: 100%; }
+    .btn-group button { padding: 10px; font-size: 0.8rem; flex: 1; height: 40px; }
+
     #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.4); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+    
     #roomContainer { display: grid; grid-template-columns: 1fr; gap: 20px; }
     @media (min-width: 650px) { #roomContainer { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1100px) { #roomContainer { grid-template-columns: repeat(3, 1fr); } }
   </style>
 </head>
 <body>
+
 <div id="flash-overlay"></div>
+
 <div class="main-wrapper">
   <header>
     <h1>GIBRALTAR ARENA</h1>
     <span class="location-tag">⚔️ Battlefield: Gibraltar EPL ⚔️</span>
   </header>
+
   <div class="layout-container">
     <div class="side-panel">
       <div id="status">CONNECTING...</div>
       <div class="card guide-box">
         <span class="guide-title">📜 ARENA RULES</span>
-        <div class="guide-text">1. Register ID and head to <b>'Gibraltar EPL'</b>.<br><br>2. Teleport to the zone to <b>BATTLE</b>.<br><br>3. Find your <b>PARTNER</b>.</div>
+        <div class="guide-text">
+          1. Register ID and head to <b>'Gibraltar EPL'</b>.<br><br>
+          2. Teleport to the zone to <b>BATTLE</b>.<br><br>
+          3. Find your <b>MATCHING PARTNER</b>.
+        </div>
       </div>
     </div>
+
     <div class="main-content">
       <div id="reg-section" class="card profile-card">
         <span class="guide-title">ENTER THE GATES</span>
         <input type="text" id="avatarId" placeholder="YOUR WARRIOR NAME" maxlength="12" />
         <button class="primary-btn" id="registerBtn">CLAIM IDENTITY</button>
       </div>
+
       <div id="lobby-section" style="display:none;" class="main-content">
         <div class="card profile-card">
-          <div class="profile-area">
-            <div><span style="font-size:0.7rem; color:var(--text-dim); display:block;">Warrior</span><span class="current-nick" id="displayNick">-</span></div>
-            <span style="color:var(--fire-orange); cursor:pointer; font-size:0.8rem;" onclick="toggleChangeNick()">RENAME</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size:0.7rem; color:var(--text-dim); display:block;">Warrior</span>
+              <span id="displayNick" style="font-family:'Cinzel'; color:var(--gold); font-size:1.3rem; font-weight:bold;">-</span>
+            </div>
+            <span style="color:var(--fire-orange); cursor:pointer; font-weight:bold; font-size:0.8rem;" onclick="toggleChangeNick()">RENAME</span>
           </div>
           <div id="nick-change-box" style="display:none; margin-top:15px;">
             <input type="text" id="newNickInput" placeholder="NEW NAME" maxlength="12" />
-            <div class="btn-group"><button class="primary-btn" onclick="applyNewNick()">CONFIRM</button><button onclick="toggleChangeNick()" style="background:#444; color:white;">CANCEL</button></div>
+            <div class="btn-group">
+              <button class="primary-btn" onclick="applyNewNick()">CONFIRM</button>
+              <button onclick="toggleChangeNick()" style="background:#444; color:white;">CANCEL</button>
+            </div>
           </div>
         </div>
+
         <div class="card arena-card">
-          <div class="arena-header"><span class="guide-title" style="margin:0">ACTIVE DUELS</span><button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 20px; margin:0; font-size:0.8rem;">+ NEW DUEL</button></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <span class="guide-title" style="margin:0">ACTIVE DUELS</span>
+            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 20px; font-size:0.8rem;">+ NEW DUEL</button>
+          </div>
           <div id="roomContainer"></div>
         </div>
       </div>
@@ -89,7 +136,7 @@
 </div>
 
 <script>
-  // 1. Firebase 초기화 (가장 먼저 실행되어야 함)
+  // 1. Firebase 설정 및 초기화
   const firebaseConfig = { 
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
     authDomain: "gibraltar-live.firebaseapp.com", 
@@ -101,7 +148,7 @@
   };
   
   if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-  const db = firebase.database(); // 이제 db가 정의됨
+  const db = firebase.database();
 
   // 2. 사운드 엔진
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -164,9 +211,11 @@
           <div class="vs-text">VS</div>
           <div class="pvp-player ${getSlotClass(p2, room.p2Ready)}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
         </div>
-        <div class="btn-group">
-          ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? `<button class="start-btn" onclick="toggleReady('${id}', '${myRole}')" style="background:var(--gold); color:#000;">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-          ${myRole ? `<button onclick="leaveRoom('${id}')" style="background:#444; color:#fff;">RETREAT</button>` : ''}
+        <div class="btn-container">
+          <div class="btn-group">
+            ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? `<button class="start-btn" onclick="toggleReady('${id}', '${myRole}')" style="background:var(--gold); color:#000;">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
+            ${myRole ? `<button onclick="leaveRoom('${id}')" style="background:#444; color:#fff;">RETREAT</button>` : ''}
+          </div>
         </div>`;
       container.appendChild(div);
     });
@@ -183,7 +232,7 @@
   }
 
   window.tryJoin = (rid, slot) => {
-    const nick = getNick(); if(currentRoomId && currentRoomId!==rid) return;
+    const nick = getNick(); if(!nick || (currentRoomId && currentRoomId!==rid)) return;
     playSound('sword');
     db.ref('rooms/' + rid).transaction(r => {
       if(r && r.status!=='BATTLE') {
