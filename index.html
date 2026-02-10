@@ -20,69 +20,68 @@
       margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center;
     }
     
-    .main-wrapper { max-width: 1000px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    .main-wrapper { max-width: 1200px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
-    /* 데스크탑에서만 가로 레이아웃 적용 (850px 이상) */
-    @media (min-width: 850px) {
-      .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
-      header { text-align: left; padding-left: 10px; }
+    @media (min-width: 900px) {
+      .layout-container { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
     }
     
     header { text-align: center; margin-bottom: 10px; width: 100%; }
     h1 { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
     .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.75rem; border: 1px solid var(--epl-gold); padding: 3px 15px; border-radius: 50px; margin-top: 8px; display: inline-block; background: rgba(240, 136, 62, 0.1); }
 
-    /* Left Side: Side Panel */
     .side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
-
-    /* Card Common Styling */
     .card { background: var(--bg-panel); border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 
     .guide-box { border-left: 4px solid var(--blue-neon); background: rgba(0, 212, 255, 0.02); }
     .guide-title { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; display: block; }
     .guide-text { color: var(--text-dim); font-size: 0.85rem; line-height: 1.6; }
 
-    /* Right Side: Main Content */
     .main-content { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+    #status { padding: 8px; border-radius: 8px; font-size: 0.7rem; text-align: center; background: #000; border: 1px solid #222; }
 
-    #status { padding: 8px; border-radius: 8px; font-size: 0.7rem; text-align: center; background: #000; border: 1px solid #222; margin-bottom: 10px; }
-
-    /* 아이디 설정 카드 (Profile Card) */
+    /* Profile Card */
     .profile-card { border-top: 3px solid var(--green-neon); }
     .profile-area { display: flex; justify-content: space-between; align-items: center; }
-    .nick-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-    .current-nick { font-family: 'Orbitron', sans-serif; font-weight: bold; color: var(--green-neon); font-size: 1.1rem; display: block; }
-    .edit-btn { font-size: 0.75rem; color: var(--blue-neon); cursor: pointer; text-decoration: underline; }
+    .current-nick { font-family: 'Orbitron', sans-serif; font-weight: bold; color: var(--green-neon); font-size: 1.1rem; }
+    .edit-btn { font-size: 0.75rem; color: var(--blue-neon); cursor: pointer; }
 
-    /* 배틀 아레나 카드 (Battle Arena Card) */
-    .arena-card { border-top: 3px solid var(--blue-neon); flex-grow: 1; }
-    .arena-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--blue-neon); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    /* Arena Card & Grid */
+    .arena-card { border-top: 3px solid var(--blue-neon); }
+    .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    
+    /* 핵심: 방 목록 그리드 설정 */
+    #roomContainer { 
+      display: grid; 
+      grid-template-columns: 1fr; /* 기본 1줄 */
+      gap: 15px; 
+    }
+
+    @media (min-width: 600px) { #roomContainer { grid-template-columns: repeat(2, 1fr); } } /* 태블릿: 2줄 */
+    @media (min-width: 1100px) { #roomContainer { grid-template-columns: repeat(3, 1fr); } } /* 와이드 PC: 3줄 */
 
     input { padding: 14px; margin: 10px 0; font-size: 15px; width: 100%; border-radius: 10px; border: 1px solid #30363d; background: #05070a; color: white; outline: none; }
-    input:focus { border-color: var(--blue-neon); }
-
-    button { padding: 14px; margin: 8px 0; font-size: 14px; width: 100%; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
-    .primary-btn { background: var(--blue-neon); color: #000; }
+    button { padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
+    .primary-btn { background: var(--blue-neon); color: #000; width: 100%; }
     .primary-btn:disabled { background: #1c2128; color: #484f58; cursor: not-allowed; }
 
-    /* Room 디자인 최적화 */
-    .pvp-room { background: #161b22; margin-bottom: 15px; padding: 15px; border-radius: 12px; border: 1px solid #30363d; }
+    /* Room 디자인 컴팩트화 */
+    .pvp-room { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; display: flex; flex-direction: column; justify-content: space-between; }
     .pvp-room.battle-active { border-color: var(--blue-neon); box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
     
-    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
-    .pvp-player { flex: 1; height: 60px; background: #05070a; border-radius: 8px; border: 2px solid #222; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
+    .pvp-slots { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+    .pvp-player { flex: 1; height: 50px; background: #05070a; border-radius: 8px; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; }
     .pvp-player.ready { border-color: var(--green-neon); color: var(--green-neon); }
-    .vs-text { color: var(--red-neon); font-weight: bold; font-style: italic; font-size: 0.9rem; }
+    .vs-text { color: var(--red-neon); font-weight: bold; font-size: 0.7rem; }
 
-    .btn-group { display: flex; gap: 8px; }
-    .btn-group button { padding: 10px; font-size: 0.8rem; margin: 0; }
-    .start-btn { background: var(--blue-neon); color: #000; flex: 2; }
+    .btn-group { display: flex; gap: 5px; }
+    .btn-group button { padding: 8px; font-size: 0.7rem; margin: 0; flex: 1; }
+    .start-btn { background: var(--blue-neon); color: #000; }
     .start-btn.ready-active { background: var(--green-neon); }
-    .stop-btn { background: var(--orange-neon); color: #000; flex: 1; }
-    .leave-btn { background: var(--red-neon); color: #fff; flex: 1; }
+    .leave-btn { background: var(--red-neon); color: #fff; }
 
     .footer-area { width: 100%; text-align: center; padding: 20px 0; }
-    .disclaimer { font-size: 0.65rem; color: #484f58; line-height: 1.5; margin-top: 10px; padding: 0 10px; }
+    .disclaimer { font-size: 0.65rem; color: #484f58; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -96,23 +95,20 @@
   <div class="layout-container">
     <div class="side-panel">
       <div id="status">INITIATING...</div>
-      
       <div class="card guide-box">
         <span class="guide-title">🚀 MISSION GUIDE</span>
         <div class="guide-text">
-          1. Register ID and head to <b>'Gibraltar EPL'</b> in E2V1.<br><br>
-          2. Teleport to the zone to initiate <b>battle</b>.<br><br>
+          1. Register ID and head to <b>'Gibraltar EPL'</b> in E2V1.<br>
+          2. Teleport to the zone to initiate <b>battle</b>.<br>
           3. Use this arena to find your perfect <b>battle partner</b>.
         </div>
       </div>
-      
       <div class="disclaimer">
-        <b>NOTICE:</b> Community tool for E2V1. We comply with ToS. No financial rewards provided directly.
+        <b>NOTICE:</b> Community tool for E2V1. We comply with ToS.
       </div>
     </div>
 
     <div class="main-content">
-      
       <div id="reg-section" class="card profile-card">
         <span class="guide-title" style="color:var(--green-neon)">IDENTITY SETUP</span>
         <input type="text" id="avatarId" placeholder="ENTER PLAYER NICKNAME" maxlength="12" />
@@ -123,12 +119,11 @@
         <div class="card profile-card">
           <div class="profile-area">
             <div>
-              <span class="nick-label">Active Pilot</span>
+              <span style="font-size:0.6rem; color:var(--text-dim); display:block;">ACTIVE PILOT</span>
               <span class="current-nick" id="displayNick">-</span>
             </div>
             <span class="edit-btn" onclick="toggleChangeNick()">CHANGE ID</span>
           </div>
-          
           <div id="nick-change-box" style="display:none; margin-top:15px;">
             <input type="text" id="newNickInput" placeholder="NEW NICKNAME" maxlength="12" />
             <div class="btn-group">
@@ -139,26 +134,23 @@
         </div>
 
         <div class="card arena-card">
-          <div class="arena-title">
-            <span>BATTLE ARENA</span>
+          <div class="arena-header">
+            <span class="guide-title" style="margin:0">BATTLE ARENA</span>
             <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 15px; margin:0; font-size:0.7rem;">+ CREATE ROOM</button>
           </div>
-          
           <div id="roomContainer">
             </div>
         </div>
       </div>
-
     </div>
   </div>
 
   <div class="footer-area">
-    <button onclick="db.goOffline(); setTimeout(()=>db.goOnline(),500)" style="background:transparent; color:#444; border:1px solid #222; width:auto; padding:5px 15px; font-size:0.7rem;">🔄 RESET CONNECTION</button>
+    <button onclick="location.reload()" style="background:transparent; color:#444; border:1px solid #222; width:auto; padding:5px 15px; font-size:0.7rem;">🔄 REFRESH SYSTEM</button>
   </div>
 </div>
 
 <script>
-  // (Firebase Logic - Previous stable version)
   const firebaseConfig = {
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo",
     authDomain: "gibraltar-live.firebaseapp.com",
@@ -208,9 +200,9 @@
       const div = document.createElement('div');
       div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--text-dim); font-family:'Orbitron'">
+        <div style="display:flex; justify-content:space-between; font-size:0.55rem; color:var(--text-dim); font-family:'Orbitron'">
           <span>#${id.slice(-4)}</span>
-          <span>${isInBattle ? 'IN BATTLE' : 'WAITING'}</span>
+          <span style="color:${isInBattle ? 'var(--blue-neon)' : 'inherit'}">${isInBattle ? 'IN BATTLE' : 'WAITING'}</span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${room.p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
@@ -222,7 +214,6 @@
             `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
               ${amIReady ? 'READY' : 'PREPARE'}
             </button>` : ''}
-          ${(myRole && isInBattle) ? `<button class="stop-btn" onclick="stopBattle('${id}')">STOP</button>` : ''}
           ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
         </div>`;
       container.appendChild(div);
@@ -246,7 +237,6 @@
     localStorage.setItem('nickname', newNick);
     location.reload();
   };
-  window.stopBattle = (rid) => db.ref('rooms/'+rid).update({status:'WAITING', p1Ready:false, p2Ready:false});
   window.leaveRoom = (rid) => {
     const nick = getNick();
     db.ref('rooms/'+rid).transaction(r => {
