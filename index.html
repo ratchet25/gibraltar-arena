@@ -18,6 +18,8 @@
       --border-color: #2a2a2a;
       --text-main: #ffffff;
       --text-dim: #888888;
+      --status-waiting: #444;
+      --status-battle: #ff3e3e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
@@ -25,73 +27,59 @@
       background-color: var(--bg-color); 
       color: var(--text-main); 
       font-family: 'Inter', sans-serif; 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 40px 20px;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px;
     }
 
     header { text-align: center; margin-bottom: 50px; }
-    header h1 { 
-      font-family: 'Cinzel', serif; 
-      font-size: 2.8rem; 
-      letter-spacing: 6px; 
-      text-transform: uppercase;
-      font-weight: 900;
-    }
-    header p { 
-      color: var(--accent-red); 
-      font-size: 0.9rem; 
-      letter-spacing: 4px; 
-      font-weight: 800;
-      margin-top: -5px;
-    }
+    header h1 { font-family: 'Cinzel', serif; font-size: 2.8rem; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; }
+    header p { color: var(--accent-red); font-size: 0.9rem; letter-spacing: 4px; font-weight: 800; margin-top: -5px; }
 
     .main-container { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
     @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
 
     .sidebar { display: flex; flex-direction: column; gap: 20px; }
-    .status-badge { 
-      background: #000; border-left: 4px solid var(--accent-gold); 
-      padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold);
-    }
+    .status-badge { background: #000; border-left: 4px solid var(--accent-gold); padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); }
     .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 25px; }
     .sidebar h4 { font-family: 'Cinzel', serif; color: var(--accent-gold); margin-bottom: 15px; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
     .rules-list { font-size: 0.85rem; color: var(--text-dim); list-style: none; }
     .rules-list li { margin-bottom: 15px; }
 
     .avatar-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .avatar-info span { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
     .avatar-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
     .btn-reset { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 6px 12px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
-    .btn-reset:hover { border-color: var(--accent-red); color: var(--accent-red); }
 
     .lobby-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .lobby-header h3 { font-family: 'Cinzel', serif; color: var(--accent-red); letter-spacing: 2px; }
     .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
     .btn-create:disabled { background: #333; cursor: not-allowed; }
 
+    /* Room Cards */
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; position: relative; }
-    .room-id { font-size: 0.65rem; color: #444; position: absolute; top: 15px; left: 15px; }
-    .room-status { font-size: 0.65rem; color: var(--text-dim); position: absolute; top: 15px; right: 15px; text-transform: uppercase; }
+    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; overflow: hidden; transition: transform 0.2s; }
+    .room-card:hover { transform: translateY(-3px); }
     
-    .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
-    .player-slot { 
-      flex: 1; height: 65px; background: #000; border: 1px dashed #333; 
-      display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; transition: 0.3s;
+    .room-id { font-size: 0.65rem; color: #555; position: absolute; top: 10px; left: 15px; font-weight: 800; }
+
+    /* --- Status Labels Enhancements --- */
+    .room-status { 
+      position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-bottom-left-radius: 4px;
     }
+    .status-waiting-label { background: var(--status-waiting); color: #aaa; animation: pulse-gray 2s infinite; }
+    .status-battle-label { background: var(--status-battle); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); animation: pulse-red 1.5s infinite; }
+
+    @keyframes pulse-gray { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    @keyframes pulse-red { 0% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } 50% { box-shadow: 0 0 15px rgba(255, 62, 62, 0.9); } 100% { box-shadow: 0 0 0px rgba(255, 62, 62, 0.7); } }
+
+    .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
+    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
     .player-slot.occupied { border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; font-family: 'Cinzel', serif; }
-    .player-slot.ready { background: rgba(255, 183, 3, 0.1); box-shadow: inset 0 0 15px rgba(255,183,3,0.2); }
+    .player-slot.ready { background: rgba(255, 183, 3, 0.1); border-style: solid; box-shadow: inset 0 0 15px rgba(255,183,3,0.2); }
     .vs-divider { color: var(--accent-red); font-weight: 900; font-size: 1.2rem; font-family: 'Cinzel', serif; }
 
     .room-actions { display: flex; gap: 10px; }
     .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; border-radius: 2px; }
 
     #auth-section { max-width: 440px; width: 100%; margin-top: 50px; }
-    input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.1rem; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-    input[type="text"]::placeholder { color: #444; }
+    input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.1rem; font-family: 'Cinzel', serif; }
   </style>
 </head>
 <body>
@@ -122,14 +110,14 @@
     <div class="lobby-content">
       <div class="avatar-profile card">
         <div class="avatar-info">
-          <span>Current Avatar</span>
+          <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Current Avatar</span>
           <h2 id="avatarDisplay">-</h2>
         </div>
         <button class="btn-reset" onclick="forceReset()">RESET PROFILE</button>
       </div>
 
       <div class="lobby-header">
-        <h3>ACTIVE DUELS</h3>
+        <h3 style="font-family:'Cinzel'; color:var(--accent-red); letter-spacing: 2px;">ACTIVE DUELS</h3>
         <button id="createRoomBtn" class="btn-create" onclick="createRoom()">+ NEW ROOM</button>
       </div>
 
@@ -189,20 +177,20 @@
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
-
-        // 유령 데이터 필터링
         if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') || !r.p1) {
           db.ref(`rooms/${id}`).remove();
           return;
         }
 
+        const isBattle = r.status === 'BATTLE';
+        const statusClass = isBattle ? 'status-battle-label' : 'status-waiting-label';
         const myRole = (r.p1 === currentAvatar) ? 'p1' : (r.p2 === currentAvatar ? 'p2' : null);
 
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
           <div class="room-id">#${id.slice(-4)}</div>
-          <div class="room-status">${r.status || 'WAITING'}</div>
+          <div class="room-status ${statusClass}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
             <div class="player-slot ${r.p1!=='EMPTY'?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${r.p1}</div>
             <div class="vs-divider">VS</div>
@@ -223,9 +211,7 @@
   function createRoom() {
     const avatar = getAvatar();
     const newRef = db.ref('rooms').push();
-    newRef.set({
-      p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING'
-    });
+    newRef.set({ p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
   window.join = (rid, slot) => {
