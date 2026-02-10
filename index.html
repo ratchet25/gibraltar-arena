@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | Solid & Secure</title>
+  <title>Gibraltar Arena | Ceasefire</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
@@ -38,7 +38,6 @@
     .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.2rem; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 8px; }
     .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.8; }
 
-    /* 프로필 카드 높이 고정 */
     .profile-card { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; }
     .nick-container { height: 100%; display: flex; flex-direction: column; justify-content: center; }
     .btn-row { display: flex; gap: 10px; margin-top: 15px; height: 45px; }
@@ -47,13 +46,10 @@
     button { cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.2s; border: none; border-radius: 6px; }
     .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; height: 50px; }
     .primary-btn:hover { filter: brightness(1.2); }
-    .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-    /* 그리드 레이아웃 */
     .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 50px; }
     #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
 
-    /* 방 인스턴스 높이 고정 */
     .pvp-room { 
       background: #251e1a; padding: 25px; border-radius: 10px; border: 2px solid var(--border-metal); 
       height: 300px; display: flex; flex-direction: column; justify-content: space-between; position: relative;
@@ -72,24 +68,14 @@
     
     .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
     .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); }
-    
-    /* 🛡️ READY 상태에서 흔들리는 효과(animation) 제거 */
-    .slot-ready { 
-      background: rgba(255, 215, 0, 0.2); 
-      border: 2px solid var(--gold); 
-      color: var(--gold); 
-      box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3);
-    }
+    .slot-ready { background: rgba(255, 215, 0, 0.2); border: 2px solid var(--gold); color: var(--gold); box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3); }
 
     .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.6rem; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
-    /* 하단 버튼 영역 고정 */
     .room-actions { height: 60px; display: flex; align-items: flex-end; }
     .btn-group { display: flex; gap: 10px; width: 100%; height: 45px; }
     .btn-group button { flex: 1; font-size: 0.85rem; height: 100%; }
     .leave-btn { background: #444; color: #fff; }
-    /* 🛡️ 전투 중 퇴각 버튼 스타일 (시각적 피드백용) */
-    .leave-btn:disabled { background: #222; color: #555; cursor: not-allowed; opacity: 0.6; }
 
     #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.5); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
   </style>
@@ -243,7 +229,7 @@
             <div class="btn-group">
               ${(!isInBattle && p1!=='EMPTY' && p2!=='EMPTY') ? 
                 `<button class="primary-btn" onclick="toggleReady('${id}', '${myRole}')" style="${amIReady ? 'background:var(--gold); color:#000;' : ''}">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-              <button class="leave-btn" onclick="leaveRoom('${id}', '${room.status}')" ${isInBattle ? 'disabled' : ''}>RETREAT</button>
+              <button class="leave-btn" onclick="handleRetreat('${id}', '${room.status}')">RETREAT ${isInBattle ? '(RESET)' : ''}</button>
             </div>
           ` : ''}
         </div>
@@ -288,14 +274,22 @@
     });
   };
 
-  // 🛡️ 전투 중 퇴각 방지 로직 추가
-  window.leaveRoom = (rid, status) => { 
+  // 🛡️ 수정된 RETREAT 로직: 전투 중이면 상태 리셋, 대기 중이면 퇴장
+  window.handleRetreat = (rid, status) => { 
+    playSound('click');
+    
     if (status === 'BATTLE') {
-      alert("⚔️ 전투 중에는 투기장을 떠날 수 없습니다!");
+      // 전투 중일 때는 상태만 리셋
+      db.ref('rooms/' + rid).update({
+        status: 'WAITING',
+        p1Ready: false,
+        p2Ready: false,
+        lastUpdate: Date.now()
+      });
       return;
     }
-    
-    playSound('click'); 
+
+    // 대기 중일 때는 기존 퇴장 로직 수행
     db.ref('rooms/'+rid).transaction(r => { 
       if(r) { 
         if(r.p1===getNick()) {r.p1='EMPTY'; r.p1Ready=false;} 
