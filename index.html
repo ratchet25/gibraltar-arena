@@ -18,25 +18,29 @@
     h1 { color: var(--blue-accent); margin: 0; font-size: 1.6rem; text-transform: uppercase; }
     .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); display: inline-block; padding: 2px 15px; border-radius: 20px; margin-top: 8px; }
     
-    input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; }
+    input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; transition: all 0.2s; }
     button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:active { filter: brightness(1.3); }
+    button:active { transform: scale(0.98); filter: brightness(1.2); }
     button:disabled { background: #21262d !important; color: #484f58 !important; cursor: not-allowed; }
     
-    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); }
+    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); transition: opacity 0.5s; }
     
     .pvp-room { background: #21262d; margin: 15px 0; padding: 15px; border-radius: 10px; border: 1px solid #444c56; }
+    .room-info { font-size: 0.75rem; color: var(--epl-gold); margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; }
     .pvp-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .pvp-player { flex: 1; height: 65px; background: #0d1117; border-radius: 8px; text-align: center; border: 2px solid #30363d; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+    .pvp-player { flex: 1; height: 65px; background: #0d1117; border-radius: 8px; text-align: center; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; position: relative; overflow: hidden; }
+    .pvp-player.ready { border-color: var(--green-btn); box-shadow: inset 0 0 10px rgba(35, 134, 54, 0.3); }
+    .pvp-player.ready::after { content: "READY"; font-size: 0.6rem; color: var(--green-btn); margin-top: 4px; }
     .pvp-player.waiting { color: #484f58; border: 2px dashed #484f58; }
     .vs-label { font-weight: bold; color: var(--red-btn); font-style: italic; font-size: 1.2rem; }
     
     .btn-group { display: flex; gap: 8px; }
     .start-btn { background: var(--blue-accent); color: #000; flex: 2; }
+    .start-btn.ready-active { background: var(--green-btn); color: #fff; }
     .leave-btn { background: var(--red-btn); flex: 1; }
 
     .footer-area { padding: 20px 0; text-align: center; border-top: 1px solid #30363d; margin-top: 20px; }
-    .reset-btn { background: transparent; color: var(--text-gray); font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; }
+    .reset-btn { background: transparent; color: var(--text-gray); font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -60,7 +64,7 @@
   </div>
 
   <div class="footer-area">
-    <button class="reset-btn" onclick="forceReset()">🔄 RECONNECT (KEEP SESSION)</button>
+    <button class="reset-btn" id="softResetBtn">🔄 REFRESH CONNECTION</button>
   </div>
 </div>
 
@@ -88,8 +92,13 @@
 
   db.ref(".info/connected").on("value", (snap) => {
     const nick = getNick();
-    document.getElementById('status').innerHTML = snap.val() ? 
-      `✅ Online | <b>${nick || 'Guest'}</b>` : `❌ Offline`;
+    const statusEl = document.getElementById('status');
+    if (snap.val()) {
+      statusEl.innerHTML = `✅ Server Online | <b>${nick || 'Guest'}</b>`;
+      statusEl.style.opacity = "1";
+    } else {
+      statusEl.innerHTML = `❌ Offline | Reconnecting...`;
+    }
   });
 
   db.ref('rooms').on('value', (snapshot) => {
@@ -103,28 +112,55 @@
     Object.keys(rooms).forEach(id => {
       const room = rooms[id];
       const p1 = room.p1 || 'EMPTY', p2 = room.p2 || 'EMPTY';
+      const p1Ready = room.p1Ready || false;
+      const p2Ready = room.p2Ready || false;
       const isInBattle = room.status === 'BATTLE';
       const isFull = (p1 !== 'EMPTY' && p2 !== 'EMPTY');
+      
+      const myRole = (p1 === nick) ? 'p1' : (p2 === nick ? 'p2' : null);
+      const amIReady = (myRole === 'p1' ? p1Ready : (myRole === 'p2' ? p2Ready : false));
 
       const div = document.createElement('div');
       div.className = 'pvp-room';
       div.innerHTML = `
-        <div style="font-size:0.75rem; color:var(--epl-gold); margin-bottom:8px; font-weight:bold;">
-          ${isInBattle ? "🔥 IN BATTLE" : "⏳ WAITING"}
+        <div class="room-info">
+          <span>ID: ${id.slice(-4)}</span>
+          <span>${isInBattle ? "🔥 IN BATTLE" : (p1Ready || p2Ready ? "⚔️ PREPARING" : "⏳ WAITING")}</span>
         </div>
         <div class="pvp-slots">
-          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
+          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
           <div class="vs-label">VS</div>
-          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
+          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''} ${p2Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
         </div>
         <div class="btn-group">
-          ${(isFull && !isInBattle && (p1 === nick || p2 === nick)) ? `<button class="start-btn" onclick="startBattle('${id}')">START MATCH</button>` : ''}
-          ${(p1 === nick || p2 === nick) ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
+          ${(isFull && !isInBattle && myRole) ? 
+            `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
+              ${amIReady ? 'READY CANCEL' : 'START MATCH'}
+            </button>` : ''}
+          ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
         </div>
       `;
       container.appendChild(div);
     });
   });
+
+  // 2인 동의 시작 로직 (READY 토글)
+  window.toggleReady = (roomId, role) => {
+    const roomRef = db.ref('rooms/' + roomId);
+    roomRef.transaction((room) => {
+      if (room) {
+        // 내 상태 뒤집기
+        if (role === 'p1') room.p1Ready = !room.p1Ready;
+        if (role === 'p2') room.p2Ready = !room.p2Ready;
+
+        // 둘 다 READY면 BATTLE 진입
+        if (room.p1Ready && room.p2Ready) {
+          room.status = 'BATTLE';
+        }
+      }
+      return room;
+    });
+  };
 
   document.getElementById('registerBtn').onclick = () => {
     const val = document.getElementById('avatarId').value.trim();
@@ -136,8 +172,10 @@
     if (!nick || getMyRoom()) return;
     this.disabled = true;
     const roomId = "room_" + Date.now();
-    db.ref('rooms/' + roomId).set({ p1: nick, p2: 'EMPTY', status: 'WAITING' })
-      .then(() => localStorage.setItem('my_room_id', roomId));
+    db.ref('rooms/' + roomId).set({ 
+      p1: nick, p2: 'EMPTY', status: 'WAITING', 
+      p1Ready: false, p2Ready: false 
+    }).then(() => localStorage.setItem('my_room_id', roomId));
   };
 
   window.tryJoin = (roomId, slot) => {
@@ -146,15 +184,13 @@
     db.ref('rooms/' + roomId).transaction((room) => {
       if (room && room.status !== 'BATTLE') {
         if (room[slot] !== 'EMPTY' && room[slot] !== nick) return;
-        if (room.p1 === nick) room.p1 = 'EMPTY';
-        if (room.p2 === nick) room.p2 = 'EMPTY';
+        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
+        if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
         room[slot] = nick;
       }
       return room;
     });
   };
-
-  window.startBattle = (roomId) => db.ref('rooms/' + roomId).update({ status: 'BATTLE' });
 
   window.leaveRoom = (roomId) => {
     const nick = getNick();
@@ -166,22 +202,29 @@
         db.ref('rooms/' + roomId).remove().then(() => localStorage.removeItem('my_room_id'));
       } else {
         let updates = { status: 'WAITING' };
-        if (room.p1 === nick) updates['p1'] = 'EMPTY';
-        if (room.p2 === nick) updates['p2'] = 'EMPTY';
+        if (room.p1 === nick) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; }
+        if (room.p2 === nick) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; }
         db.ref('rooms/' + roomId).update(updates).then(() => localStorage.removeItem('my_room_id'));
       }
     });
   };
 
-  // 방 정보를 유지하는 안전한 리셋 함수
-  window.forceReset = () => {
-    if (confirm("연결을 재설정하시겠습니까? (참여 중인 방 정보는 유지됩니다)")) {
-      db.goOffline();
-      setTimeout(() => {
-        db.goOnline();
-        location.reload(); 
-      }, 500);
-    }
+  // 눈이 편안한 소프트 리셋 (깜빡임 없음)
+  document.getElementById('softResetBtn').onclick = function() {
+    const btn = this;
+    const statusEl = document.getElementById('status');
+    
+    btn.disabled = true;
+    statusEl.style.opacity = "0.3";
+    statusEl.innerText = "🔄 Refreshing data...";
+    
+    db.goOffline();
+    setTimeout(() => {
+      db.goOnline();
+      statusEl.style.opacity = "1";
+      btn.disabled = false;
+      // location.reload() 대신 데이터만 다시 붙여넣음
+    }, 800);
   };
 </script>
 </body>
