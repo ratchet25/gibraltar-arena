@@ -8,84 +8,123 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <style>
     :root { 
-      --bg-dark: #0d1117; --bg-panel: #161b22; --blue-accent: #58a6ff; 
-      --green-btn: #238636; --red-btn: #da3633; --orange-btn: #d16d00; --gray-btn: #30363d; --epl-gold: #f0883e; 
+      --bg-dark: #05070a; --bg-panel: #0d1117; --blue-neon: #00d4ff; 
+      --green-neon: #39ff14; --red-neon: #ff0055; --orange-neon: #ffaa00;
+      --text-main: #e6edf3; --text-dim: #8b949e; --epl-gold: #f0883e; 
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-    .container { max-width: 500px; margin: auto; width: 100%; background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid #30363d; flex-grow: 1; }
-    header { text-align: center; margin-bottom: 20px; position: relative; }
-    h1 { color: var(--blue-accent); margin: 0; font-size: 1.6rem; text-transform: uppercase; }
-    .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); display: inline-block; padding: 2px 15px; border-radius: 20px; margin-top: 8px; }
     
-    /* 닉네임 변경 UI */
-    .profile-area { background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #30363d; }
-    .current-nick { font-weight: bold; color: var(--blue-accent); font-size: 0.9rem; }
-    .change-link { font-size: 0.75rem; color: #8b949e; text-decoration: underline; cursor: pointer; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Orbitron', 'Segoe UI', sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .container { max-width: 480px; margin: auto; width: 100%; background: var(--bg-panel); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 30px rgba(0, 212, 255, 0.1); }
+    
+    header { text-align: center; margin-bottom: 25px; }
+    h1 { color: var(--blue-neon); margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
+    .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.75rem; border: 1px solid var(--epl-gold); padding: 4px 15px; border-radius: 50px; margin-top: 10px; display: inline-block; background: rgba(240, 136, 62, 0.1); }
 
-    input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; }
-    button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:disabled { background: #21262d !important; color: #484f58 !important; cursor: not-allowed; opacity: 0.5; }
-    
-    #status { margin: 10px 0; padding: 12px; background: #010409; border-radius: 8px; font-size: 0.85rem; border-left: 4px solid var(--blue-accent); }
-    
-    .pvp-room { background: #21262d; margin: 15px 0; padding: 15px; border-radius: 10px; border: 1px solid #444c56; }
-    .room-info { font-size: 0.75rem; color: var(--epl-gold); margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; }
-    .pvp-slots { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .pvp-player { flex: 1; height: 65px; background: #0d1117; border-radius: 8px; text-align: center; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-    .pvp-player.ready { border-color: var(--green-btn); }
-    .pvp-player.ready::after { content: "READY"; font-size: 0.6rem; color: var(--green-btn); margin-top: 4px; }
-    .pvp-player.waiting { color: #484f58; border: 2px dashed #484f58; }
-    
-    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .start-btn { background: var(--blue-accent); color: #000; flex: 2; min-width: 140px; }
-    .start-btn.ready-active { background: var(--green-btn); color: #fff; }
-    .stop-btn { background: var(--orange-btn); flex: 1; min-width: 100px; }
-    .leave-btn { background: var(--red-btn); flex: 1; min-width: 80px; }
+    /* Guide Box Styling */
+    .guide-box { background: rgba(0, 212, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 12px; padding: 15px; margin-bottom: 20px; border-left: 4px solid var(--blue-neon); }
+    .guide-title { color: var(--blue-neon); font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+    .guide-text { color: var(--text-dim); font-size: 0.8rem; line-height: 1.6; }
 
-    .footer-area { padding: 20px 0; text-align: center; border-top: 1px solid #30363d; margin-top: 20px; }
-    .reset-btn { background: transparent; color: #8b949e; font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; border-radius: 20px; }
+    /* Status Bar */
+    #status { margin-bottom: 15px; padding: 10px; border-radius: 8px; font-size: 0.8rem; text-align: center; background: rgba(255,255,255,0.03); }
+
+    /* Profile UI */
+    .profile-area { background: #161b22; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #30363d; }
+    .current-nick { font-weight: bold; color: var(--green-neon); font-size: 0.95rem; }
+    .change-link { font-size: 0.75rem; color: var(--text-dim); text-decoration: none; cursor: pointer; border-bottom: 1px dashed var(--text-dim); }
+
+    input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border-radius: 10px; border: 1px solid #30363d; background: #05070a; color: white; transition: 0.3s; }
+    input:focus { border-color: var(--blue-neon); box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+
+    button { padding: 16px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .primary-btn { background: var(--blue-neon); color: #000; box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+    .primary-btn:active { transform: translateY(2px); box-shadow: none; }
+    .primary-btn:disabled { background: #21262d; color: #484f58; box-shadow: none; }
+
+    /* Room Cards */
+    .pvp-room { background: #161b22; margin: 20px 0; padding: 20px; border-radius: 15px; border: 1px solid #30363d; position: relative; transition: 0.3s; }
+    .pvp-room:hover { border-color: var(--blue-neon); }
+    .room-header { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 15px; font-weight: bold; }
+    
+    .pvp-slots { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .pvp-player { flex: 1; height: 75px; background: #05070a; border-radius: 12px; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; transition: 0.3s; position: relative; }
+    .pvp-player.waiting { border: 2px dashed #30363d; color: #484f58; }
+    .pvp-player.ready { border-color: var(--green-neon); color: var(--green-neon); box-shadow: 0 0 15px rgba(57, 255, 20, 0.2); }
+    .pvp-player.ready::after { content: 'READY'; position: absolute; top: -10px; background: var(--green-neon); color: black; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
+
+    .vs-icon { color: var(--red-neon); font-style: italic; font-size: 1.2rem; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+
+    /* Button Groups */
+    .btn-group { display: flex; gap: 10px; }
+    .start-btn { background: var(--blue-neon); color: black; flex: 2; padding: 12px; }
+    .start-btn.ready-active { background: var(--green-neon); }
+    .stop-btn { background: var(--orange-neon); color: black; flex: 1; padding: 12px; }
+    .leave-btn { background: var(--red-neon); color: white; flex: 1; padding: 12px; }
+
+    /* Footer & Disclaimer */
+    .footer-area { padding: 30px 0; text-align: center; }
+    .disclaimer { font-size: 0.65rem; color: #484f58; text-align: center; margin-top: 20px; line-height: 1.5; padding: 0 10px; }
+    .reset-btn { background: transparent; color: #484f58; border: 1px solid #30363d; padding: 8px 15px; font-size: 0.7rem; border-radius: 5px; cursor: pointer; }
+
+    /* Animations */
+    @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); } }
+    .battle-active { animation: pulse-blue 2s infinite; border-color: var(--blue-neon); }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>Gibraltar Arena</h1>
-    <div class="location-tag">📍 EPL: gibraltar</div>
+    <h1>GIBRALTAR ARENA</h1>
+    <div class="location-tag">📍 EPL: GIBRALTAR</div>
   </header>
+
+  <div class="guide-box">
+    <span class="guide-title">🚀 MISSION GUIDE</span>
+    <div class="guide-text">
+      1. After registration, go to <b>'gibraltar epl'</b> in E2V1.<br>
+      2. Teleport to earn Essence (Uniswap tradable).<br>
+      3. Use this arena to coordinate and maximize profit.
+    </div>
+  </div>
   
-  <div id="status">Connecting...</div>
+  <div id="status">INITIATING SYSTEM...</div>
 
   <div id="reg-section">
-    <input type="text" id="avatarId" placeholder="Enter Nickname" maxlength="12" />
-    <button id="registerBtn">Enter Arena</button>
+    <input type="text" id="avatarId" placeholder="PLAYER NICKNAME" maxlength="12" />
+    <button class="primary-btn" id="registerBtn">JOIN ARENA</button>
   </div>
 
   <div id="lobby-section" style="display:none;">
     <div class="profile-area">
-      <span class="current-nick" id="displayNick">Nickname: -</span>
-      <span class="change-link" onclick="toggleChangeNick()">Change ID</span>
+      <span class="current-nick" id="displayNick">PLAYER: -</span>
+      <span class="change-link" onclick="toggleChangeNick()">EDIT ID</span>
     </div>
     
-    <div id="nick-change-box" style="display:none; margin-bottom:15px;">
-      <input type="text" id="newNickInput" placeholder="New Nickname" maxlength="12" style="margin-bottom:0;"/>
-      <div class="btn-group" style="margin-top:5px;">
-        <button onclick="applyNewNick()" style="padding:10px; font-size:14px;">Apply</button>
-        <button onclick="toggleChangeNick()" style="padding:10px; font-size:14px; background:var(--gray-btn);">Cancel</button>
+    <div id="nick-change-box" style="display:none; margin-bottom:15px; animation: slideIn 0.3s ease;">
+      <input type="text" id="newNickInput" placeholder="NEW NICKNAME" maxlength="12" />
+      <div class="btn-group">
+        <button class="primary-btn" onclick="applyNewNick()" style="padding:10px;">APPLY</button>
+        <button onclick="toggleChangeNick()" style="padding:10px; background:var(--gray-btn); color:white; border:1px solid #444;">CANCEL</button>
       </div>
     </div>
 
-    <button id="createRoomBtn">Create New Battle Room</button>
+    <button class="primary-btn" id="createRoomBtn">CREATE BATTLE ROOM</button>
     <div id="roomContainer"></div>
   </div>
 
   <div class="footer-area">
-    <button class="reset-btn" id="softResetBtn">🔄 REFRESH CONNECTION</button>
+    <button class="reset-btn" id="softResetBtn">🔄 REFRESH SYSTEM</button>
+    <div class="disclaimer">
+      <b>DISCLAIMER:</b> Independent community tool. Not affiliated with E2V1. We comply with E2V1 ToS. Essence rewards and teleportation mechanics are governed solely by E2V1. All activities are at the user's own risk.
+    </div>
   </div>
 </div>
 
 <script>
+  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo",
     authDomain: "gibraltar-live.firebaseapp.com",
@@ -107,13 +146,15 @@
     if (nick) {
       document.getElementById('reg-section').style.display = 'none';
       document.getElementById('lobby-section').style.display = 'block';
-      document.getElementById('displayNick').innerText = `Player: ${nick}`;
+      document.getElementById('displayNick').innerText = `PLAYER: ${nick}`;
     }
   }
   initUI();
 
   db.ref(".info/connected").on("value", (snap) => {
-    document.getElementById('status').innerHTML = snap.val() ? `✅ Server Online` : `❌ Offline`;
+    document.getElementById('status').innerHTML = snap.val() ? 
+      `<span style="color:var(--green-neon)">● SYSTEM ONLINE</span>` : 
+      `<span style="color:var(--red-neon)">● SYSTEM OFFLINE</span>`;
   });
 
   db.ref('rooms').on('value', (snapshot) => {
@@ -133,25 +174,33 @@
       const amIReady = (myRole === 'p1' ? room.p1Ready : room.p2Ready);
 
       const div = document.createElement('div');
-      div.className = 'pvp-room';
+      div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
-        <div class="room-info">
-          <span>ID: ${id.slice(-4)}</span>
-          <span>${isInBattle ? "🔥 BATTLE" : "⏳ WAITING"}</span>
+        <div class="room-header">
+          <span>ROOM ID: ${id.slice(-4)}</span>
+          <span style="color:${isInBattle ? 'var(--blue-neon)' : 'var(--text-dim)'}">
+            ${isInBattle ? '● IN BATTLE' : '● WAITING'}
+          </span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${room.p1Ready ? 'ready' : ''}" 
-               onclick="tryJoin('${id}', 'p1')">${p1}</div>
-          <div class="vs-label">VS</div>
+               onclick="tryJoin('${id}', 'p1')">
+               <span style="font-size:0.6rem; color:var(--text-dim); margin-bottom:4px;">PLAYER 1</span>
+               ${p1}
+          </div>
+          <div class="vs-icon">VS</div>
           <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''} ${room.p2Ready ? 'ready' : ''}" 
-               onclick="tryJoin('${id}', 'p2')">${p2}</div>
+               onclick="tryJoin('${id}', 'p2')">
+               <span style="font-size:0.6rem; color:var(--text-dim); margin-bottom:4px;">PLAYER 2</span>
+               ${p2}
+          </div>
         </div>
         <div class="btn-group">
           ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? 
             `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
-              ${amIReady ? 'READY CANCEL' : 'START MATCH'}
+              ${amIReady ? 'CANCEL READY' : 'PREPARE BATTLE'}
             </button>` : ''}
-          ${(myRole && isInBattle) ? `<button class="stop-btn" onclick="stopBattle('${id}')">STOP BATTLE</button>` : ''}
+          ${(myRole && isInBattle) ? `<button class="stop-btn" onclick="stopBattle('${id}')">STOP</button>` : ''}
           ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
         </div>
       `;
@@ -159,7 +208,6 @@
     });
   });
 
-  // 닉네임 변경 관련 함수
   window.toggleChangeNick = () => {
     const box = document.getElementById('nick-change-box');
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
@@ -169,8 +217,6 @@
     const oldNick = getNick();
     const newNick = document.getElementById('newNickInput').value.trim();
     if (!newNick || oldNick === newNick) return;
-
-    // 1. 참여 중인 방이 있다면 이름 교체 (Firebase 실시간 반영)
     if (currentRoomId) {
       db.ref('rooms/' + currentRoomId).transaction((room) => {
         if (room) {
@@ -180,10 +226,8 @@
         return room;
       });
     }
-
-    // 2. 로컬 스토리지 업데이트 및 UI 갱신
     localStorage.setItem('nickname', newNick);
-    document.getElementById('displayNick').innerText = `Player: ${newNick}`;
+    document.getElementById('displayNick').innerText = `PLAYER: ${newNick}`;
     toggleChangeNick();
     document.getElementById('newNickInput').value = '';
   };
@@ -209,7 +253,7 @@
     const nick = getNick();
     if (!nick) return;
     if (currentRoomId && currentRoomId !== roomId) {
-      alert("You are already in another room!");
+      alert("YOU ARE ALREADY IN ANOTHER ROOM");
       return;
     }
     db.ref('rooms/' + roomId).transaction((room) => {
