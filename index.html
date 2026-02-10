@@ -24,10 +24,7 @@
     .btn-create:disabled { background:#333; color:#555; cursor:not-allowed; opacity:0.5; }
     .room-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }
     .room-card { background:var(--card-bg); border:1px solid var(--border-color); padding:35px 20px 20px; position:relative; }
-    
-    /* 방 이름(ID) 디자인 강화 */
     .room-id-label { position:absolute; top:12px; left:15px; font-size:0.7rem; color:var(--accent-gold); font-weight:900; font-family:'Cinzel'; letter-spacing:1px; opacity:0.7; }
-    
     .room-status { position:absolute; top:0; right:0; padding:4px 12px; font-size:0.65rem; font-weight:900; border-bottom-left-radius:4px; }
     .status-waiting-label { background:#333; color:#888; }
     .status-battle-label { background:var(--accent-red); color:#fff; box-shadow:0 0 10px rgba(255, 62, 62, 0.5); }
@@ -43,22 +40,26 @@
 </head>
 <body>
   <header><h1>GIBRALTAR ARENA</h1><p>EPL: GIBRALTAR</p></header>
+  
   <div id="auth-section" class="card" style="display:none;">
     <input type="text" id="avatarInput" placeholder="ENTER E2V1 AVATAR NAME" maxlength="12">
     <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
+
   <div id="lobby-section" class="main-container" style="display:none;">
     <div class="sidebar">
       <div class="status-badge">⚡ ARENA CONNECTED</div>
       <div class="card">
         <h4 style="font-family:'Cinzel'; color:var(--accent-red); margin-bottom:15px; font-size:0.9rem; letter-spacing:2px;">RULES</h4>
-        <div style="font-size:0.75rem; color:var(--text-dim); line-height:2.2;">
-          <p>1. Forge name.</p>
-          <p>2. Join slot.</p>
-          <p>3. READY to duel.</p>
+        <div style="font-size:0.75rem; color:var(--text-dim); line-height:1.8;">
+          <p style="color:var(--accent-gold); font-weight:800; margin-bottom:10px;">Before the duel begins, transfer your avatar to 'Gibraltar' EPL in E2V1.</p>
+          <p>1. Forge your name.</p>
+          <p>2. Join an empty slot.</p>
+          <p>3. Mark READY to duel.</p>
         </div>
         <div style="margin-top:25px; border-top:1px solid #2a2a2a; padding-top:15px;">
-          <p style="font-size:0.65rem; color:#555; line-height:1.5;">Disclaimer: No liability for loss of Essence/Ether. Use at your own risk.</p>
+          <p style="font-size:0.65rem; color:#777; line-height:1.5; margin-bottom:8px;">This site strictly complies with the Earth2 Community Guidelines.</p>
+          <p style="font-size:0.6rem; color:#555; line-height:1.4;">Disclaimer: No liability for loss of Essence/Ether. Use at your own risk.</p>
         </div>
       </div>
     </div>
@@ -80,7 +81,6 @@
   let allRoomsData = {};
   const getAvatar = () => localStorage.getItem('arena_avatar');
 
-  // 랜덤 방 코드 생성기 (4자리)
   function generateRoomName() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -135,13 +135,9 @@
         const r = allRoomsData[id];
         const isP1Empty = (!r.p1 || r.p1 === 'EMPTY');
         const isP2Empty = (!r.p2 || r.p2 === 'EMPTY');
-
         if (isP1Empty && isP2Empty) { db.ref(`rooms/${id}`).remove(); return; }
-
         const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
-        
-        // 방 이름: 생성 시 저장된 customName이 있으면 쓰고, 없으면 ID 일부 사용
         const displayRoomName = r.customName || id.substring(1, 5).toUpperCase();
 
         const div = document.createElement('div');
@@ -178,7 +174,6 @@
       if (changed) { updates['status'] = 'WAITING'; promises.push(db.ref(`rooms/${rid}`).update(updates)); }
     });
     await Promise.all(promises);
-
     return db.ref(`rooms/${targetRid}`).transaction(r => {
       if (r) {
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
@@ -222,7 +217,6 @@
 
   async function createRoom() {
     const avatar = getAvatar();
-    // 기존 위치 청소
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
       const room = allRoomsData[rid];
@@ -234,17 +228,8 @@
       }
     });
     await Promise.all(promises);
-    
-    // 새 랜덤 방 이름 생성 후 저장
     const roomName = generateRoomName();
-    db.ref('rooms').push().set({ 
-      customName: roomName, 
-      p1: avatar, 
-      p2: 'EMPTY', 
-      p1Ready: false, 
-      p2Ready: false, 
-      status: 'WAITING' 
-    });
+    db.ref('rooms').push().set({ customName: roomName, p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
   window.forceReset = () => { localStorage.clear(); location.reload(); };
