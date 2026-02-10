@@ -89,8 +89,9 @@
     .room-actions { display: flex; gap: 10px; }
     .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; border-radius: 2px; }
 
-    #auth-section { max-width: 400px; width: 100%; margin-top: 50px; }
-    input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.2rem; font-family: 'Cinzel', serif; }
+    #auth-section { max-width: 440px; width: 100%; margin-top: 50px; }
+    input[type="text"] { width: 100%; background: #000; border: 1px solid var(--border-color); padding: 15px; color: #fff; margin-bottom: 15px; text-align: center; font-size: 1.1rem; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+    input[type="text"]::placeholder { color: #444; }
   </style>
 </head>
 <body>
@@ -101,7 +102,7 @@
   </header>
 
   <div id="auth-section" class="card" style="display:none;">
-    <input type="text" id="avatarInput" placeholder="ENTER AVATAR NAME" maxlength="12">
+    <input type="text" id="avatarInput" placeholder="ENTER E2V1 AVATAR NAME" maxlength="12">
     <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
 
