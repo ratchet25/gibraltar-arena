@@ -3,207 +3,156 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | EPL: Gibraltar</title>
+  <title>Gibraltar Arena | EPL</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    :root { --bg: #0a0a0a; --card: #151515; --red: #ff3e3e; --gold: #ffb703; --border: #222; }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: #eee; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-    .main-wrapper { max-width: 1000px; width: 100%; }
-    header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--red); padding-bottom: 10px; }
-    h1 { font-family: 'Cinzel', serif; font-size: 2.2rem; letter-spacing: 4px; color: #fff; }
-    #status { font-size: 0.75rem; color: var(--gold); margin-top: 5px; font-weight: 900; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 20px; }
-    .primary-btn { background: var(--red); color: #fff; border: none; padding: 12px 25px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 2px; }
-    .primary-btn:disabled { background: #333; cursor: not-allowed; }
-    #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-    .room { background: #111; border: 1px solid var(--border); padding: 15px; position: relative; }
-    .room-header { display: flex; justify-content: space-between; font-size: 0.7rem; color: #555; margin-bottom: 10px; }
-    .slots { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 15px 0; }
-    .slot { flex: 1; height: 50px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
-    .slot.occupied { border: 1px solid var(--gold); color: var(--gold); font-weight: 900; }
-    .slot.ready { background: rgba(255, 183, 3, 0.15); box-shadow: inset 0 0 10px rgba(255,183,3,0.3); }
-    .vs { font-family: 'Cinzel', serif; color: var(--red); font-weight: 900; font-size: 1.2rem; }
-    .actions { display: flex; gap: 8px; margin-top: 10px; }
-    .action-btn { flex: 1; padding: 8px; border: none; font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.75rem; cursor: pointer; }
-    input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; outline: none; margin-bottom: 10px; }
+    :root { --bg: #0a0a0a; --card: #111; --red: #ff3e3e; --gold: #ffb703; --border: #222; }
+    body { background: var(--bg); color: #eee; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    .main-wrapper { max-width: 900px; width: 100%; }
+    h1 { font-family: 'Cinzel', serif; text-align: center; color: #fff; letter-spacing: 5px; margin-bottom: 30px; }
+    .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+    .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+    .room { background: #000; border: 1px solid var(--border); padding: 15px; text-align: center; }
+    .slot { height: 45px; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 10px 0; font-size: 0.9rem; }
+    .slot.active { border: 1px solid var(--gold); color: var(--gold); font-weight: bold; }
+    .slot.ready { background: rgba(255, 183, 3, 0.1); }
+    .primary-btn { background: var(--red); color: #fff; border: none; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; width: 100%; }
+    .action-btn { padding: 8px; border: none; cursor: pointer; font-size: 0.7rem; font-weight: bold; flex: 1; }
+    input { background: #000; border: 1px solid #333; color: #fff; padding: 10px; width: 100%; margin-bottom: 10px; }
   </style>
 </head>
 <body>
 
 <div class="main-wrapper">
-  <header>
-    <h1>GIBRALTAR ARENA</h1>
-    <div id="status">INITIALIZING...</div>
-  </header>
-
-  <div id="reg-section" class="card" style="display:none; text-align:center;">
-    <input type="text" id="avatarId" placeholder="ENTER WARRIOR NAME" maxlength="12" />
-    <button class="primary-btn" id="registerBtn">JOIN BATTLEFIELD</button>
+  <h1>GIBRALTAR ARENA</h1>
+  <div id="auth-ui" class="card" style="display:none;">
+    <input type="text" id="nickInput" placeholder="ENTER NICKNAME" maxlength="10">
+    <button class="primary-btn" onclick="register()">ENTER ARENA</button>
   </div>
 
-  <div id="lobby-section" style="display:none;">
+  <div id="lobby-ui" style="display:none;">
     <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <span style="font-size:0.7rem; color:#555;">WARRIOR</span>
-        <div id="displayNick" style="color:var(--gold); font-family:'Cinzel'; font-size:1.4rem;">-</div>
-      </div>
-      <button onclick="forceReset()" style="background:none; border:1px solid #333; color:#555; padding:5px 10px; font-size:0.7rem; cursor:pointer;">FORCE RESET</button>
+      <span id="myNickDisplay" style="color:var(--gold); font-weight:bold;"></span>
+      <button onclick="forceReset()" style="background:none; border:1px solid #444; color:#666; font-size:0.7rem; cursor:pointer; padding:4px 8px;">FORCE RESET</button>
     </div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center; margin: 20px 0;">
-      <h3 style="font-family:'Cinzel'; color:var(--red);">ACTIVE DUELS</h3>
-      <button id="createRoomBtn" class="primary-btn" style="padding:8px 20px; font-size:0.8rem;">+ NEW ROOM</button>
-    </div>
-    <div id="roomContainer"></div>
+    <button class="primary-btn" id="createBtn" style="margin-bottom:20px;">+ NEW DUEL</button>
+    <div id="rooms" class="room-grid"></div>
   </div>
 </div>
 
 <script>
   let db;
-  let currentRoomId = null;
-  const getNick = () => localStorage.getItem('nickname');
+  const getMyNick = () => localStorage.getItem('arena_nick');
 
   window.onload = function() {
     const config = { 
       apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
-      authDomain: "gibraltar-live.firebaseapp.com", 
       databaseURL: "https://gibraltar-live-default-rtdb.firebaseio.com", 
-      projectId: "gibraltar-live", 
-      storageBucket: "gibraltar-live.firebasestorage.app", 
-      messagingSenderId: "286453523509", 
-      appId: "1:286453523509:web:32f97e69cbed2c41fcfd7c" 
+      projectId: "gibraltar-live" 
     };
     firebase.initializeApp(config);
     db = firebase.database();
-    
-    // 🛡️ 연결 상태 감시 및 자동 청소
-    db.ref(".info/connected").on("value", s => {
-      document.getElementById('status').innerText = s.val() ? "● ARENA ONLINE" : "○ ARENA OFFLINE";
-    });
-
-    initApp();
+    checkAuth();
   };
 
-  function initApp() {
-    const nick = getNick();
+  function checkAuth() {
+    const nick = getMyNick();
     if (nick) {
-      document.getElementById('reg-section').style.display = 'none';
-      document.getElementById('lobby-section').style.display = 'block';
-      document.getElementById('displayNick').innerText = nick;
-      listenRooms();
+      document.getElementById('auth-ui').style.display = 'none';
+      document.getElementById('lobby-ui').style.display = 'block';
+      document.getElementById('myNickDisplay').innerText = `WARRIOR: ${nick}`;
+      initLobby();
     } else {
-      document.getElementById('reg-section').style.display = 'block';
+      document.getElementById('auth-ui').style.display = 'block';
     }
   }
 
-  function listenRooms() {
-    db.ref('rooms').on('value', snapshot => {
-      const rooms = snapshot.val() || {};
-      const container = document.getElementById('roomContainer');
-      const nick = getNick();
+  function register() {
+    const val = document.getElementById('nickInput').value.trim().toUpperCase();
+    if (val && val !== 'EMPTY' && val !== 'UNDEFINED') {
+      localStorage.setItem('arena_nick', val);
+      location.reload();
+    }
+  }
+
+  function initLobby() {
+    db.ref('rooms').on('value', snap => {
+      const rooms = snap.val() || {};
+      const container = document.getElementById('rooms');
       container.innerHTML = '';
-      
-      currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
-      document.getElementById('createRoomBtn').disabled = !!currentRoomId;
+      const nick = getMyNick();
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
-
-        // 🛡️ 유령방(빈 방) 즉시 제거
-        if (!r || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY')) {
+        
+        // 🛡️ 유령 데이터 청소: 데이터가 비정상이거나 둘 다 비어있으면 즉시 삭제
+        if (!r || !r.p1 || (r.p1 === 'EMPTY' && r.p2 === 'EMPTY')) {
           db.ref(`rooms/${id}`).remove();
           return;
         }
 
-        const myRole = (r.p1 === nick) ? 'p1' : (r.p2 === nick ? 'p2' : null);
-        const amIReady = (myRole === 'p1' ? r.p1Ready : r.p2Ready);
+        const isP1 = r.p1 === nick;
+        const isP2 = r.p2 === nick;
+        const myRole = isP1 ? 'p1' : (isP2 ? 'p2' : null);
 
         const div = document.createElement('div');
         div.className = 'room';
         div.innerHTML = `
-          <div class="room-header"><span>ID: ${id.slice(-4)}</span><span>${r.status || 'WAITING'}</span></div>
-          <div class="slots">
-            <div class="slot ${r.p1!=='EMPTY'?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}', 'p1')">${r.p1}</div>
-            <div class="vs">VS</div>
-            <div class="slot ${r.p2!=='EMPTY'?'occupied':''} ${r.p2Ready?'ready':''}" onclick="join('${id}', 'p2')">${r.p2}</div>
-          </div>
-          <div class="actions">
-            ${myRole ? `
-              <button class="action-btn" style="background:var(--gold); color:#000;" onclick="toggleReady('${id}', '${myRole}')">${amIReady?'CANCEL':'READY'}</button>
-              <button class="action-btn" style="background:#333; color:#ccc;" onclick="leave('${id}')">LEAVE</button>
-            ` : ''}
-          </div>
+          <div style="font-size:0.6rem; color:#444; margin-bottom:5px;">ID: ${id.slice(-4)}</div>
+          <div class="slot ${r.p1!=='EMPTY'?'active':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${r.p1}</div>
+          <div style="color:var(--red); font-weight:900; font-size:0.8rem;">VS</div>
+          <div class="slot ${r.p2!=='EMPTY'?'active':''} ${r.p2Ready?'ready':''}" onclick="join('${id}','p2')">${r.p2}</div>
+          ${myRole ? `
+            <div style="display:flex; gap:5px; margin-top:10px;">
+              <button class="action-btn" style="background:var(--gold);" onclick="toggleReady('${id}','${myRole}')">${r[myRole+'Ready']?'CANCEL':'READY'}</button>
+              <button class="action-btn" style="background:#333; color:#eee;" onclick="leave('${id}')">LEAVE</button>
+            </div>
+          ` : ''}
         `;
         container.appendChild(div);
       });
     });
   }
 
-  // 🛡️ 실시간 연결 해제 보호 로직
-  function setPresence(rid, role) {
-    const pRef = db.ref(`rooms/${rid}/${role}`);
-    const rRef = db.ref(`rooms/${rid}/${role}Ready`);
-    pRef.onDisconnect().set('EMPTY');
-    rRef.onDisconnect().set(false);
-  }
-
-  document.getElementById('createRoomBtn').onclick = () => {
-    const nick = getNick();
-    if (currentRoomId || !nick) return;
-    const newRef = db.ref('rooms').push();
-    newRef.set({
-      p1: nick, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING'
-    }).then(() => {
-      setPresence(newRef.key, 'p1');
-    });
-  };
-
   window.join = (rid, slot) => {
-    const nick = getNick();
-    if (currentRoomId && currentRoomId !== rid) return;
+    const nick = getMyNick();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
         if (r[slot] !== 'EMPTY' && r[slot] !== nick) return r;
         if (r.p1 === nick) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         if (r.p2 === nick) { r.p2 = 'EMPTY'; r.p2Ready = false; }
         r[slot] = nick;
-        r.status = 'WAITING';
       }
       return r;
-    }, (err, comm) => { if (comm) setPresence(rid, slot); });
+    });
   };
 
   window.leave = (rid) => {
+    const nick = getMyNick();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        if (r.p1 === getNick()) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        else if (r.p2 === getNick()) { r.p2 = 'EMPTY'; r.p2Ready = false; }
+        if (r.p1 === nick) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        if (r.p2 === nick) { r.p2 = 'EMPTY'; r.p2Ready = false; }
         if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null; // 방 삭제
-        r.status = 'WAITING';
       }
       return r;
     });
   };
 
   window.toggleReady = (rid, role) => {
-    db.ref(`rooms/${rid}`).transaction(r => {
-      if (r) {
-        if (role === 'p1') r.p1Ready = !r.p1Ready;
-        else r.p2Ready = !r.p2Ready;
-        r.status = (r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
-      }
-      return r;
+    db.ref(`rooms/${rid}/${role}Ready`).transaction(s => !s);
+  };
+
+  document.getElementById('createBtn').onclick = () => {
+    const nick = getMyNick();
+    db.ref('rooms').push({
+      p1: nick, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING'
     });
   };
 
-  window.forceReset = () => { if(currentRoomId) leave(currentRoomId); localStorage.clear(); location.reload(); };
-  document.getElementById('registerBtn').onclick = () => {
-    const v = document.getElementById('avatarId').value.trim();
-    if (v) { localStorage.setItem('nickname', v.toUpperCase()); location.reload(); }
-  };
+  window.forceReset = () => { localStorage.clear(); location.reload(); };
 </script>
 </body>
 </html>
