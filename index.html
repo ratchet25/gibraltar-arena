@@ -4,106 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Gibraltar Arena | EPL: GIBRALTAR</title>
-  
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-color: #0d0d0d;
-      --card-bg: #161616;
-      --accent-red: #ff3e3e;
-      --accent-gold: #ffb703;
-      --border-color: #2a2a2a;
-      --text-main: #ffffff;
-      --text-dim: #888888;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-    body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px; }
-    
-    header { text-align: center; margin-bottom: 50px; }
-    header h1 { font-family: 'Cinzel', serif; font-size: 2.8rem; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; }
-    header p { color: var(--accent-red); font-size: 0.9rem; letter-spacing: 4px; font-weight: 800; margin-top: -5px; }
-
-    .main-container { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
-    @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 25px; }
-    .status-badge { background: #000; border-left: 4px solid var(--accent-gold); padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 20px;}
-    
-    .avatar-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .avatar-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
-
-    .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
-    .btn-create:disabled { background: #333; color: #555; cursor: not-allowed; opacity: 0.5; }
-
-    .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; }
-    
-    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; }
-    .status-waiting-label { background: #333; color: #888; }
-    .status-battle-label { background: var(--accent-red); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); }
-
-    .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
-    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; color: #444; overflow: hidden; }
-    .player-slot.occupied { border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; font-family: 'Cinzel', serif; }
-    .player-slot.ready { background: rgba(255, 183, 3, 0.15); border-style: solid; box-shadow: inset 0 0 10px rgba(255,183,3,0.3); }
-
-    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
-    .btn-ready { background: var(--accent-gold); color: #000; }
-    .btn-retreat { background: #333; color: #ccc; }
-    
-    #auth-section { max-width: 400px; width: 100%; text-align: center; }
-    input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: #fff; margin-bottom: 10px; text-align: center; font-family: 'Cinzel'; }
+    :root { --bg-color:#0d0d0d; --card-bg:#161616; --accent-red:#ff3e3e; --accent-gold:#ffb703; --border-color:#2a2a2a; --text-main:#ffffff; --text-dim:#888888; }
+    * { box-sizing:border-box; margin:0; padding:0; outline:none; }
+    body { background-color:var(--bg-color); color:var(--text-main); font-family:'Inter', sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:40px 20px; }
+    header { text-align:center; margin-bottom:50px; }
+    header h1 { font-family:'Cinzel', serif; font-size:2.8rem; letter-spacing:6px; text-transform:uppercase; font-weight:900; }
+    header p { color:var(--accent-red); font-size:0.9rem; letter-spacing:4px; font-weight:800; margin-top:-5px; }
+    .main-container { width:100%; max-width:1100px; display:grid; grid-template-columns:320px 1fr; gap:30px; }
+    @media (max-width:900px) { .main-container { grid-template-columns:1fr; } }
+    .card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:4px; padding:25px; }
+    .status-badge { background:#000; border-left:4px solid var(--accent-gold); padding:12px 20px; font-size:0.75rem; font-weight:800; color:var(--accent-gold); margin-bottom:20px;}
+    .avatar-profile { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+    .avatar-info h2 { font-family:'Cinzel', serif; color:var(--accent-gold); font-size:1.8rem; }
+    .btn-create { background:var(--accent-red); border:none; color:white; padding:10px 20px; font-family:'Cinzel', serif; font-weight:900; cursor:pointer; border-radius:4px; }
+    .btn-create:disabled { background:#333; color:#555; cursor:not-allowed; opacity:0.5; }
+    .room-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }
+    .room-card { background:var(--card-bg); border:1px solid var(--border-color); padding:25px 20px 20px; position:relative; }
+    .room-status { position:absolute; top:0; right:0; padding:4px 12px; font-size:0.65rem; font-weight:900; border-bottom-left-radius:4px; }
+    .status-waiting-label { background:#333; color:#888; }
+    .status-battle-label { background:var(--accent-red); color:#fff; box-shadow:0 0 10px rgba(255, 62, 62, 0.5); }
+    .duel-area { display:flex; align-items:center; justify-content:center; gap:15px; margin:25px 0; }
+    .player-slot { flex:1; height:65px; background:#000; border:1px dashed #333; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; transition:0.3s; color:#444; }
+    .player-slot.occupied { border:1px solid var(--accent-gold); color:var(--accent-gold); font-weight:800; font-family:'Cinzel', serif; }
+    .player-slot.ready { background:rgba(255, 183, 3, 0.15); border-style:solid; }
+    .btn-room { flex:1; padding:8px; border:none; font-weight:800; font-family:'Cinzel', serif; font-size:0.7rem; cursor:pointer; }
+    .btn-ready { background:var(--accent-gold); color:#000; }
+    .btn-retreat { background:#333; color:#ccc; }
+    input { width:100%; background:#000; border:1px solid #333; padding:15px; color:#fff; margin-bottom:10px; text-align:center; font-family:'Cinzel'; }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>GIBRALTAR ARENA</h1>
-    <p>EPL: GIBRALTAR</p>
-  </header>
-
+  <header><h1>GIBRALTAR ARENA</h1><p>EPL: GIBRALTAR</p></header>
   <div id="auth-section" class="card" style="display:none;">
     <input type="text" id="avatarInput" placeholder="ENTER E2V1 AVATAR NAME" maxlength="12">
     <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
-
   <div id="lobby-section" class="main-container" style="display:none;">
     <div class="sidebar">
-      <div id="status" class="status-badge">⚡ ARENA CONNECTED</div>
-      
+      <div class="status-badge">⚡ ARENA CONNECTED</div>
       <div class="card">
-        <h4 style="font-family:'Cinzel'; color:var(--accent-red); margin-bottom:15px; font-size: 0.9rem; letter-spacing: 2px;">RULES</h4>
+        <h4 style="font-family:'Cinzel'; color:var(--accent-red); margin-bottom:15px; font-size:0.9rem; letter-spacing:2px;">RULES</h4>
         <div style="font-size:0.75rem; color:var(--text-dim); line-height:2.2;">
           <p>1. Forge name.</p>
           <p>2. Join slot.</p>
           <p>3. READY to duel.</p>
         </div>
-        <div style="margin-top: 25px; border-top: 1px solid #2a2a2a; padding-top: 15px;">
-          <p style="font-size: 0.65rem; color: #555; line-height: 1.5;">
-            Disclaimer: No liability for loss of Essence/Ether. Use at your own risk.
-          </p>
+        <div style="margin-top:25px; border-top:1px solid #2a2a2a; padding-top:15px;">
+          <p style="font-size:0.65rem; color:#555; line-height:1.5;">Disclaimer: No liability for loss of Essence/Ether. Use at your own risk.</p>
         </div>
       </div>
     </div>
-
     <div class="lobby-content">
       <div class="avatar-profile card">
-        <div class="avatar-info">
-          <span style="font-size: 0.6rem; color: var(--text-dim);">ACTIVE AVATAR</span>
-          <h2 id="avatarDisplay">-</h2>
-        </div>
+        <div class="avatar-info"><span style="font-size:0.6rem; color:var(--text-dim);">ACTIVE AVATAR</span><h2 id="avatarDisplay">-</h2></div>
         <button style="background:none; border:none; color:#444; cursor:pointer; font-size:10px;" onclick="forceReset()">[FORCE RESET]</button>
       </div>
-
       <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
-        <h3 style="font-family:'Cinzel'; color:var(--accent-red); letter-spacing:1px;">ACTIVE DUELS</h3>
+        <h3 style="font-family:'Cinzel'; color:var(--accent-red);">ACTIVE DUELS</h3>
         <button id="createRoomBtn" class="btn-create" onclick="createRoom()">+ NEW ROOM</button>
       </div>
-
       <div id="roomContainer" class="room-grid"></div>
     </div>
   </div>
@@ -130,22 +93,16 @@
       document.getElementById('lobby-section').style.display = 'grid';
       document.getElementById('avatarDisplay').innerText = avatar;
       startLobby();
-    } else {
-      document.getElementById('auth-section').style.display = 'block';
-    }
+    } else { document.getElementById('auth-section').style.display = 'block'; }
   }
 
   function register() {
     const val = document.getElementById('avatarInput').value.trim().toUpperCase();
-    if (val && val !== 'EMPTY') {
-      localStorage.setItem('arena_avatar', val);
-      location.reload();
-    }
+    if (val && val !== 'EMPTY') { localStorage.setItem('arena_avatar', val); location.reload(); }
   }
 
   function startLobby() {
     const avatar = getAvatar();
-
     db.ref('rooms').on('value', snap => {
       allRoomsData = snap.val() || {};
       const container = document.getElementById('roomContainer');
@@ -154,7 +111,6 @@
       const myCurrentRoomId = Object.keys(allRoomsData).find(id => allRoomsData[id].p1 === avatar || allRoomsData[id].p2 === avatar);
       document.getElementById('createRoomBtn').disabled = !!myCurrentRoomId;
 
-      // 브라우저 종료 시 자동 퇴장 (onDisconnect)
       if (myCurrentRoomId) {
         const myRole = (allRoomsData[myCurrentRoomId].p1 === avatar) ? 'p1' : 'p2';
         db.ref(`rooms/${myCurrentRoomId}/${myRole}`).onDisconnect().set('EMPTY');
@@ -166,10 +122,7 @@
         const isP1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1 === 'undefined');
         const isP2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2 === 'undefined');
 
-        if (isP1Empty && isP2Empty) {
-          db.ref(`rooms/${id}`).remove();
-          return;
-        }
+        if (isP1Empty && isP2Empty) { db.ref(`rooms/${id}`).remove(); return; }
 
         const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
@@ -177,13 +130,11 @@
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
-          <div class="room-status ${isBattle ? 'status-battle-label' : 'status-waiting-label'}">${r.status || 'WAITING'}</div>
+          <div class="room-status ${isBattle?'status-battle-label':'status-waiting-label'}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
-            <div class="player-slot ${!isP1Empty ? 'occupied' : ''} ${r.p1Ready ? 'ready' : ''}" 
-                 onclick="join('${id}','p1')">${isP1Empty ? 'EMPTY' : r.p1}</div>
+            <div class="player-slot ${!isP1Empty?'occupied':''} ${r.p1Ready?'ready':''}" onclick="join('${id}','p1')">${isP1Empty?'EMPTY':r.p1}</div>
             <div style="color:var(--accent-red); font-weight:900; font-family:'Cinzel';">VS</div>
-            <div class="player-slot ${!isP2Empty ? 'occupied' : ''} ${r.p2Ready ? 'ready' : ''}" 
-                 onclick="join('${id}','p2')">${isP2Empty ? 'EMPTY' : r.p2}</div>
+            <div class="player-slot ${!isP2Empty?'occupied':''} ${r.p2Ready?'ready':''}" onclick="join('${id}','p2')">${isP2Empty?'EMPTY':r.p2}</div>
           </div>
           <div style="display:flex; gap:10px;">
             ${myRole ? `
@@ -197,45 +148,38 @@
     });
   }
 
-  // 중복 입장 방지를 위해 입장 시 모든 방의 내 흔적을 지우는 로직 추가
-  async function clearMyLegacy(avatar) {
+  // 중복 제거와 이동을 한 번에 처리하는 핵심 함수
+  async function cleanupAndJoin(avatar, targetRid, targetSlot) {
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
+      if (rid === targetRid) return; // 현재 들어가려는 방은 나중에 트랜잭션에서 처리
       const room = allRoomsData[rid];
       let updates = {};
       let changed = false;
       if (room.p1 === avatar) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; changed = true; }
       if (room.p2 === avatar) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; changed = true; }
-      if (changed) {
-        updates['status'] = 'WAITING';
-        promises.push(db.ref(`rooms/${rid}`).update(updates));
-      }
+      if (changed) { updates['status'] = 'WAITING'; promises.push(db.ref(`rooms/${rid}`).update(updates)); }
     });
-    return Promise.all(promises);
+    await Promise.all(promises);
+
+    return db.ref(`rooms/${targetRid}`).transaction(r => {
+      if (r) {
+        // 방 내부 이동 처리
+        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
+        r[targetSlot] = avatar;
+        r[targetSlot + 'Ready'] = false;
+        r.status = 'WAITING';
+      }
+      return r;
+    });
   }
 
   window.join = async (rid, slot) => {
     const avatar = getAvatar();
     const room = allRoomsData[rid];
-    
-    // 타겟 슬롯이 비어있는지 확인
-    const targetValue = room[slot];
-    const isTargetEmpty = (!targetValue || targetValue === 'EMPTY' || targetValue === 'undefined');
-    
-    if (!isTargetEmpty) return; // 이미 주인이 있으면 무시
-
-    // 1. 먼저 모든 방에서 내 흔적을 지움 (중복 입장 원천 차단)
-    await clearMyLegacy(avatar);
-
-    // 2. 새로운 자리에 입장
-    db.ref(`rooms/${rid}`).transaction(r => {
-      if (r) {
-        r[slot] = avatar;
-        r[slot + 'Ready'] = false;
-        r.status = 'WAITING';
-      }
-      return r;
-    });
+    const isTargetEmpty = (!room[slot] || room[slot] === 'EMPTY' || room[slot] === 'undefined');
+    if (isTargetEmpty) await cleanupAndJoin(avatar, rid, slot);
   };
 
   window.toggleReady = (rid, role) => {
@@ -256,9 +200,7 @@
       if (r) {
         if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
         else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        const p1Empty = (!r.p1 || r.p1 === 'EMPTY');
-        const p2Empty = (!r.p2 || r.p2 === 'EMPTY');
-        if (p1Empty && p2Empty) return null; // 방 삭제
+        if ((!r.p1 || r.p1==='EMPTY') && (!r.p2 || r.p2==='EMPTY')) return null;
         r.status = 'WAITING';
       }
       return r;
@@ -267,7 +209,19 @@
 
   async function createRoom() {
     const avatar = getAvatar();
-    await clearMyLegacy(avatar); // 방 만들기 전에도 기존 흔적 제거
+    // 방 만들기 전 다른 모든 방에서 나를 제거
+    const promises = [];
+    Object.keys(allRoomsData).forEach(rid => {
+      const room = allRoomsData[rid];
+      if (room.p1 === avatar || room.p2 === avatar) {
+        let updates = {};
+        if (room.p1 === avatar) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; }
+        if (room.p2 === avatar) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; }
+        updates['status'] = 'WAITING';
+        promises.push(db.ref(`rooms/${rid}`).update(updates));
+      }
+    });
+    await Promise.all(promises);
     db.ref('rooms').push().set({ p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
