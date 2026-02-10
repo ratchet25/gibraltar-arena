@@ -10,28 +10,48 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* 디자인은 이전과 동일하게 유지 */
-    :root { --bg-color: #0d0d0d; --card-bg: #161616; --accent-red: #ff3e3e; --accent-gold: #ffb703; --border-color: #2a2a2a; --text-main: #ffffff; --text-dim: #888888; }
+    :root {
+      --bg-color: #0d0d0d;
+      --card-bg: #161616;
+      --accent-red: #ff3e3e;
+      --accent-gold: #ffb703;
+      --border-color: #2a2a2a;
+      --text-main: #ffffff;
+      --text-dim: #888888;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
     body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px; }
+    
     header { text-align: center; margin-bottom: 50px; }
     header h1 { font-family: 'Cinzel', serif; font-size: 2.8rem; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; }
     header p { color: var(--accent-red); font-size: 0.9rem; letter-spacing: 4px; font-weight: 800; margin-top: -5px; }
+
     .main-container { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
     @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+
     .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 25px; }
     .status-badge { background: #000; border-left: 4px solid var(--accent-gold); padding: 12px 20px; font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 20px;}
+    
     .avatar-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
     .avatar-info h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; }
+
     .btn-create { background: var(--accent-red); border: none; color: white; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: 900; cursor: pointer; border-radius: 4px; }
-    .btn-create:disabled { background: #333; color: #555; cursor: not-allowed; }
+    .btn-create:disabled { background: #333; color: #555; cursor: not-allowed; opacity: 0.5; }
+
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; }
-    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; background: #444; color: #aaa; }
+    
+    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; background: #333; color: #888; }
     .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
-    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; color: #555; text-transform: uppercase; }
+    
+    .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; color: #444; }
     .player-slot.occupied { border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; font-family: 'Cinzel', serif; }
-    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; background: #333; color: #ccc; }
+
+    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; background: #333; color: #ccc; transition: 0.2s; }
+    .btn-room:hover { background: var(--accent-red); color: white; }
+    
+    #auth-section { max-width: 400px; width: 100%; text-align: center; }
     input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: #fff; margin-bottom: 10px; text-align: center; font-family: 'Cinzel'; }
   </style>
 </head>
@@ -51,22 +71,22 @@
     <div class="sidebar">
       <div id="status" class="status-badge">⚡ ARENA CONNECTED</div>
       <div class="card">
-        <h4 style="font-family:'Cinzel'; color:var(--accent-gold); margin-bottom:10px;">RULES</h4>
-        <p style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">비어있는 슬롯(EMPTY)을 클릭하면 즉시 입장합니다. 모든 유저가 퇴장하면 전장은 소멸합니다.</p>
+        <h4 style="font-family:'Cinzel'; color:var(--accent-gold); margin-bottom:10px;">SYSTEM LOG</h4>
+        <p style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">브라우저를 닫으면 자동으로 전장에서 퇴장 처리됩니다. 빈 전장은 즉시 소멸합니다.</p>
       </div>
     </div>
 
     <div class="lobby-content">
       <div class="avatar-profile card">
         <div class="avatar-info">
-          <span style="font-size: 0.6rem; color: var(--text-dim);">WARRIOR</span>
+          <span style="font-size: 0.6rem; color: var(--text-dim);">ACTIVE AVATAR</span>
           <h2 id="avatarDisplay">-</h2>
         </div>
-        <button style="background:none; border:none; color:#555; cursor:pointer; font-size:10px;" onclick="forceReset()">[RESET PROFILE]</button>
+        <button style="background:none; border:none; color:#444; cursor:pointer; font-size:10px;" onclick="forceReset()">[FORCE RESET]</button>
       </div>
 
       <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
-        <h3 style="font-family:'Cinzel'; color:var(--accent-red);">ACTIVE DUELS</h3>
+        <h3 style="font-family:'Cinzel'; color:var(--accent-red); letter-spacing:1px;">ACTIVE DUELS</h3>
         <button id="createRoomBtn" class="btn-create" onclick="createRoom()">+ NEW ROOM</button>
       </div>
 
@@ -110,39 +130,49 @@
   }
 
   function startLobby() {
+    const avatar = getAvatar();
+
     db.ref('rooms').on('value', snap => {
       const rooms = snap.val() || {};
       const container = document.getElementById('roomContainer');
-      const avatar = getAvatar();
       container.innerHTML = '';
       
       const myRoomId = Object.keys(rooms).find(id => rooms[id].p1 === avatar || rooms[id].p2 === avatar);
       document.getElementById('createRoomBtn').disabled = !!myRoomId;
 
+      // 🛡️ [추가] 브라우저 종료 시 자동 퇴장 로직
+      if (myRoomId) {
+        const myRole = (rooms[myRoomId].p1 === avatar) ? 'p1' : 'p2';
+        db.ref(`rooms/${myRoomId}/${myRole}`).onDisconnect().set('EMPTY');
+      }
+
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
         
-        // 🛡️ 유령 데이터 청소 (데이터가 깨진 경우 삭제)
-        if (!r || (!r.p1 && !r.p2)) {
+        // 🛡️ [추가] 빈 방 자동 삭제 (p1, p2 모두 비어있거나 'EMPTY' 글자일 경우)
+        const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1.toLowerCase() === 'undefined');
+        const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2.toLowerCase() === 'undefined');
+
+        if (p1Empty && p2Empty) {
           db.ref(`rooms/${id}`).remove();
           return;
         }
 
-        const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
-        
+        const myRoleInThisRoom = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
+
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
-          <div class="room-status">${r.status || 'WAITING'}</div>
+          <div class="room-status">WAITING</div>
           <div class="duel-area">
-            <div class="player-slot ${r.p1 && r.p1 !== 'EMPTY' ? 'occupied' : ''}" 
-                 onclick="join('${id}','p1')">${r.p1 || 'EMPTY'}</div>
-            <div style="color:var(--accent-red); font-weight:900;">VS</div>
-            <div class="player-slot ${r.p2 && r.p2 !== 'EMPTY' ? 'occupied' : ''}" 
-                 onclick="join('${id}','p2')">${r.p2 || 'EMPTY'}</div>
+            <div class="player-slot ${!p1Empty ? 'occupied' : ''}" 
+                 onclick="${!myRoomId ? `join('${id}','p1')` : ''}">${r.p1 || 'EMPTY'}</div>
+            <div style="color:var(--accent-red); font-weight:900; font-family:'Cinzel';">VS</div>
+            <div class="player-slot ${!p2Empty ? 'occupied' : ''}" 
+                 onclick="${!myRoomId ? `join('${id}','p2')` : ''}">${r.p2 || 'EMPTY'}</div>
           </div>
           <div style="display:flex; gap:10px;">
-            ${myRole ? `<button class="btn-room" onclick="leave('${id}')">RETREAT (LEAVE)</button>` : ''}
+            ${myRoleInThisRoom ? `<button class="btn-room" onclick="leave('${id}')">RETREAT</button>` : ''}
           </div>
         `;
         container.appendChild(div);
@@ -159,21 +189,16 @@
 
   window.join = (rid, slot) => {
     const avatar = getAvatar();
-    if (!avatar) return;
-
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        // [중요 수정] 슬롯이 'EMPTY'이거나, 이상한 'undefined' 문자열이 저장된 경우에도 입장 허용
-        const isSlotAvailable = (!r[slot] || r[slot] === 'EMPTY' || r[slot] === 'undefined' || r[slot] === 'UNDEFINED');
+        // 이미 주인이 있으면 취소
+        if (r[slot] !== 'EMPTY' && r[slot] !== undefined && r[slot] !== 'undefined') return r;
         
-        if (!isSlotAvailable) return r; // 누군가 이미 있으면 무시
-
-        // 내가 이미 다른 슬롯에 있다면 그 자리는 비움
+        // 내가 다른 슬롯에 있었다면 비우기
         if (r.p1 === avatar) r.p1 = 'EMPTY';
         if (r.p2 === avatar) r.p2 = 'EMPTY';
 
         r[slot] = avatar;
-        r.status = 'WAITING';
       }
       return r;
     });
@@ -186,12 +211,10 @@
         if (r.p1 === avatar) r.p1 = 'EMPTY';
         if (r.p2 === avatar) r.p2 = 'EMPTY';
 
-        // 🛡️ 핵심: 두 자리가 모두 'EMPTY'이거나 비어있으면 null 리턴해서 방 삭제
-        const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1 === 'undefined' || r.p1 === 'UNDEFINED');
-        const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2 === 'undefined' || r.p2 === 'UNDEFINED');
-
+        // 둘 다 비었으면 null 반환하여 방 완전 삭제
+        const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1.toLowerCase() === 'undefined');
+        const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2.toLowerCase() === 'undefined');
         if (p1Empty && p2Empty) return null;
-        r.status = 'WAITING';
       }
       return r;
     });
