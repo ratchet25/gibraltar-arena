@@ -80,13 +80,20 @@
   let db;
   let allRoomsData = {};
   const getAvatar = () => localStorage.getItem('arena_avatar');
+  // 고유 ID (UID) 가져오기 또는 생성
+  const getUID = () => {
+    let uid = localStorage.getItem('arena_uid');
+    if (!uid) {
+      uid = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('arena_uid', uid);
+    }
+    return uid;
+  };
 
   function generateRoomName() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
-    for (let i = 0; i < 4; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
     return result;
   }
 
@@ -112,31 +119,39 @@
 
   function register() {
     const val = document.getElementById('avatarInput').value.trim().toUpperCase();
-    if (val && val !== 'EMPTY') { localStorage.setItem('arena_avatar', val); location.reload(); }
+    if (val && val !== 'EMPTY') {
+      localStorage.setItem('arena_avatar', val);
+      getUID(); // UID 생성 보장
+      location.reload();
+    }
   }
 
   function startLobby() {
     const avatar = getAvatar();
+    const myUID = getUID();
+
     db.ref('rooms').on('value', snap => {
       allRoomsData = snap.val() || {};
       const container = document.getElementById('roomContainer');
       container.innerHTML = '';
       
-      const myCurrentRoomId = Object.keys(allRoomsData).find(id => allRoomsData[id].p1 === avatar || allRoomsData[id].p2 === avatar);
+      const myCurrentRoomId = Object.keys(allRoomsData).find(id => allRoomsData[id].p1UID === myUID || allRoomsData[id].p2UID === myUID);
       document.getElementById('createRoomBtn').disabled = !!myCurrentRoomId;
 
       if (myCurrentRoomId) {
-        const myRole = (allRoomsData[myCurrentRoomId].p1 === avatar) ? 'p1' : 'p2';
+        const myRole = (allRoomsData[myCurrentRoomId].p1UID === myUID) ? 'p1' : 'p2';
         db.ref(`rooms/${myCurrentRoomId}/${myRole}`).onDisconnect().set('EMPTY');
+        db.ref(`rooms/${myCurrentRoomId}/${myRole}UID`).onDisconnect().set('EMPTY');
         db.ref(`rooms/${myCurrentRoomId}/${myRole}Ready`).onDisconnect().set(false);
       }
 
       Object.keys(allRoomsData).forEach(id => {
         const r = allRoomsData[id];
-        const isP1Empty = (!r.p1 || r.p1 === 'EMPTY');
-        const isP2Empty = (!r.p2 || r.p2 === 'EMPTY');
+        const isP1Empty = (!r.p1UID || r.p1UID === 'EMPTY');
+        const isP2Empty = (!r.p2UID || r.p2UID === 'EMPTY');
         if (isP1Empty && isP2Empty) { db.ref(`rooms/${id}`).remove(); return; }
-        const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
+        
+        const myRole = (r.p1UID === myUID) ? 'p1' : (r.p2UID === myUID ? 'p2' : null);
         const isBattle = r.status === 'BATTLE';
         const displayRoomName = r.customName || id.substring(1, 5).toUpperCase();
 
@@ -162,23 +177,25 @@
     });
   }
 
-  async function cleanupAndJoin(avatar, targetRid, targetSlot) {
+  async function cleanupAndJoin(myUID, targetRid, targetSlot) {
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
       if (rid === targetRid) return;
       const room = allRoomsData[rid];
       let updates = {};
       let changed = false;
-      if (room.p1 === avatar) { updates['p1'] = 'EMPTY'; updates['p1Ready'] = false; changed = true; }
-      if (room.p2 === avatar) { updates['p2'] = 'EMPTY'; updates['p2Ready'] = false; changed = true; }
+      if (room.p1UID === myUID) { updates['p1'] = 'EMPTY'; updates['p1UID'] = 'EMPTY'; updates['p1Ready'] = false; changed = true; }
+      if (room.p2UID === myUID) { updates['p2'] = 'EMPTY'; updates['p2UID'] = 'EMPTY'; updates['p2Ready'] = false; changed = true; }
       if (changed) { updates['status'] = 'WAITING'; promises.push(db.ref(`rooms/${rid}`).update(updates)); }
     });
     await Promise.all(promises);
     return db.ref(`rooms/${targetRid}`).transaction(r => {
       if (r) {
-        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
+        const avatar = getAvatar();
+        if (r.p1UID === myUID) { r.p1 = 'EMPTY'; r.p1UID = 'EMPTY'; r.p1Ready = false; }
+        if (r.p2UID === myUID) { r.p2 = 'EMPTY'; r.p2UID = 'EMPTY'; r.p2Ready = false; }
         r[targetSlot] = avatar;
+        r[targetSlot + 'UID'] = myUID;
         r[targetSlot + 'Ready'] = false;
         r.status = 'WAITING';
       }
@@ -187,28 +204,28 @@
   }
 
   window.join = async (rid, slot) => {
-    const avatar = getAvatar();
-    const isTargetEmpty = (!allRoomsData[rid][slot] || allRoomsData[rid][slot] === 'EMPTY');
-    if (isTargetEmpty) await cleanupAndJoin(avatar, rid, slot);
+    const myUID = getUID();
+    const isTargetEmpty = (!allRoomsData[rid][slot + 'UID'] || allRoomsData[rid][slot + 'UID'] === 'EMPTY');
+    if (isTargetEmpty) await cleanupAndJoin(myUID, rid, slot);
   };
 
   window.toggleReady = (rid, role) => {
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
         r[role + 'Ready'] = !r[role + 'Ready'];
-        r.status = (r.p1 !== 'EMPTY' && r.p2 !== 'EMPTY' && r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
+        r.status = (r.p1UID !== 'EMPTY' && r.p2UID !== 'EMPTY' && r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
       }
       return r;
     });
   };
 
   window.leave = (rid) => {
-    const avatar = getAvatar();
+    const myUID = getUID();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
-        else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
-        if (r.p1 === 'EMPTY' && r.p2 === 'EMPTY') return null;
+        if (r.p1UID === myUID) { r.p1 = 'EMPTY'; r.p1UID = 'EMPTY'; r.p1Ready = false; }
+        else if (r.p2UID === myUID) { r.p2 = 'EMPTY'; r.p2UID = 'EMPTY'; r.p2Ready = false; }
+        if ((!r.p1UID || r.p1UID === 'EMPTY') && (!r.p2UID || r.p2UID === 'EMPTY')) return null;
         r.status = 'WAITING';
       }
       return r;
@@ -217,19 +234,20 @@
 
   async function createRoom() {
     const avatar = getAvatar();
+    const myUID = getUID();
     const promises = [];
     Object.keys(allRoomsData).forEach(rid => {
       const room = allRoomsData[rid];
-      if (room.p1 === avatar || room.p2 === avatar) {
+      if (room.p1UID === myUID || room.p2UID === myUID) {
         let updates = { status: 'WAITING' };
-        if (room.p1 === avatar) { updates.p1 = 'EMPTY'; updates.p1Ready = false; }
-        if (room.p2 === avatar) { updates.p2 = 'EMPTY'; updates.p2Ready = false; }
+        if (room.p1UID === myUID) { updates.p1 = 'EMPTY'; updates.p1UID = 'EMPTY'; updates.p1Ready = false; }
+        if (room.p2UID === myUID) { updates.p2 = 'EMPTY'; updates.p2UID = 'EMPTY'; updates.p2Ready = false; }
         promises.push(db.ref(`rooms/${rid}`).update(updates));
       }
     });
     await Promise.all(promises);
     const roomName = generateRoomName();
-    db.ref('rooms').push().set({ customName: roomName, p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
+    db.ref('rooms').push().set({ customName: roomName, p1: avatar, p1UID: myUID, p2: 'EMPTY', p2UID: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
   window.forceReset = () => { localStorage.clear(); location.reload(); };
