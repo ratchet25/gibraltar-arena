@@ -36,58 +36,43 @@
 
     .guide-box { border-left: 4px solid var(--fire-red); background: rgba(255, 69, 0, 0.05); }
     .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.1rem; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 5px; }
-    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; font-weight: 500; }
+    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; }
     .guide-text b { color: var(--gold); }
 
     .main-content { display: flex; flex-direction: column; gap: 20px; width: 100%; }
     #status { padding: 10px; border-radius: 4px; font-size: 0.8rem; text-align: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); font-weight: bold; }
 
-    /* Identity Card */
+    /* Profile Card */
     .profile-card { border-top: 4px solid var(--fire-orange); }
     .profile-area { display: flex; justify-content: space-between; align-items: center; }
     .current-nick { font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: 1.3rem; }
     .edit-btn { font-size: 0.85rem; color: var(--fire-orange); cursor: pointer; font-weight: bold; }
 
-    /* Arena Card & Grid */
+    /* Arena Grid */
     .arena-card { border-top: 4px solid var(--fire-red); }
     .arena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
     
-    #roomContainer { 
-      display: grid; grid-template-columns: 1fr; gap: 20px; 
-    }
+    #roomContainer { display: grid; grid-template-columns: 1fr; gap: 20px; }
     @media (min-width: 650px) { #roomContainer { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1100px) { #roomContainer { grid-template-columns: repeat(3, 1fr); } }
 
     input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 4px; }
-    input:focus { border-color: var(--fire-orange); outline: none; }
-
     button { padding: 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.3s; font-size: 1rem; }
-    .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); width: 100%; }
-    .primary-btn:hover { filter: brightness(1.2); }
-    .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; text-shadow: none; }
+    .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; }
+    .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-    /* Battle Room 스타일 (투기장 컨셉) */
-    .pvp-room { 
-      background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); 
-      position: relative; transition: transform 0.2s;
-    }
-    .pvp-room.battle-active { 
-      border-color: var(--fire-red); 
-      box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
-      background: #2d1610;
-    }
+    /* Duel Card */
+    .pvp-room { background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); }
+    .pvp-room.battle-active { border-color: var(--fire-red); box-shadow: 0 0 20px rgba(255, 69, 0, 0.3); background: #2d1610; }
     
     .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
-    .pvp-player { 
-      flex: 1; height: 60px; background: #120e0c; border: 1px solid var(--border-metal); 
-      display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; color: var(--text-light);
-    }
+    .pvp-player { flex: 1; height: 60px; background: #120e0c; border: 1px solid var(--border-metal); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; color: var(--text-light); }
     .pvp-player.ready { border: 2px solid var(--fire-orange); color: var(--gold); background: rgba(255, 140, 0, 0.1); }
     .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.2rem; }
 
     .btn-group { display: flex; gap: 8px; }
     .btn-group button { padding: 10px; font-size: 0.8rem; flex: 1; }
-    .start-btn { background: #39ff14; color: #000; background: linear-gradient(to bottom, #ffd700, #ff8c00); }
+    .start-btn { background: linear-gradient(to bottom, #ffd700, #ff8c00); color: #000; }
     .leave-btn { background: #444; color: #fff; }
 
     .footer-area { width: 100%; text-align: center; padding: 30px 0; border-top: 1px solid var(--border-metal); margin-top: 40px; }
@@ -104,17 +89,14 @@
 
   <div class="layout-container">
     <div class="side-panel">
-      <div id="status">CONNECTING TO ARENA...</div>
+      <div id="status">CONNECTING...</div>
       <div class="card guide-box">
         <span class="guide-title">📜 ARENA RULES</span>
         <div class="guide-text">
-          1. Register your ID and head to <b>'gibraltar'</b> EPL in E2V1.<br><br>
+          1. Register ID and head to <b>'Gibraltar EPL'</b> in E2V1.<br><br>
           2. Teleport to the zone to initiate <b>BATTLE</b>.<br><br>
           3. Use this arena to find your <b>MATCHING PARTNER</b>.
         </div>
-      </div>
-      <div class="disclaimer">
-        <b>NOTICE:</b> This is a community tool for E2V1 warriors. We honor the Terms of Service.
       </div>
     </div>
 
@@ -129,7 +111,7 @@
         <div class="card profile-card">
           <div class="profile-area">
             <div>
-              <span style="font-size:0.7rem; color:var(--text-dim); display:block; text-transform:uppercase;">Current Warrior</span>
+              <span style="font-size:0.7rem; color:var(--text-dim); display:block; text-transform:uppercase;">Warrior</span>
               <span class="current-nick" id="displayNick">-</span>
             </div>
             <span class="edit-btn" onclick="toggleChangeNick()">RENAME</span>
@@ -148,15 +130,14 @@
             <span class="guide-title" style="margin:0">ACTIVE DUELS</span>
             <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 20px; margin:0; font-size:0.8rem;">+ NEW DUEL</button>
           </div>
-          <div id="roomContainer">
-            </div>
+          <div id="roomContainer"></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="footer-area">
-    <button onclick="location.reload()" style="background:transparent; color:var(--text-dim); border:1px solid var(--border-metal); width:auto; padding:8px 20px; font-size:0.8rem;">🔄 REFRESH ARENA</button>
+    <div class="disclaimer">자동 청소 시스템 가동 중: 1시간 이상 방치된 방은 소멸합니다.</div>
   </div>
 </div>
 
@@ -186,13 +167,28 @@
   }
   initUI();
 
-  db.ref(".info/connected").on("value", (snap) => {
-    document.getElementById('status').innerHTML = snap.val() ? 
-      `🔥 ARENA CONNECTED 🔥` : `❄️ ARENA DISCONNECTED ❄️`;
+  // 시스템 청소 기능 (Ghost Room Cleanup)
+  function cleanupRooms(rooms) {
+    const now = Date.now();
+    const MAX_AGE = 3600000; // 1시간
+    Object.keys(rooms).forEach(id => {
+      const room = rooms[id];
+      const isExpired = room.lastUpdate && (now - room.lastUpdate > MAX_AGE);
+      const isGhost = (room.p1 === 'EMPTY' && room.p2 === 'EMPTY');
+      if (isExpired || isGhost) {
+        db.ref('rooms/' + id).remove();
+      }
+    });
+  }
+
+  db.ref(".info/connected").on("value", snap => {
+    document.getElementById('status').innerText = snap.val() ? "🔥 ARENA ONLINE 🔥" : "❄️ OFFLINE ❄️";
   });
 
-  db.ref('rooms').on('value', (snapshot) => {
+  db.ref('rooms').on('value', snapshot => {
     const rooms = snapshot.val() || {};
+    cleanupRooms(rooms); // 렌더링 시마다 청소 실행
+
     const container = document.getElementById('roomContainer');
     container.innerHTML = '';
     const nick = getNick();
@@ -211,7 +207,7 @@
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); font-family:'Cinzel'">
           <span>#${id.slice(-4)}</span>
-          <span>${isInBattle ? '⚔️ IN COMBAT' : '🛡️ WAITING'}</span>
+          <span>${isInBattle ? '⚔️ COMBAT' : '🛡️ WAITING'}</span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${room.p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
@@ -221,7 +217,7 @@
         <div class="btn-group">
           ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? 
             `<button class="start-btn ${amIReady ? 'ready-active' : ''}" onclick="toggleReady('${id}', '${myRole}')">
-              ${amIReady ? 'CANCEL' : 'READY'}
+              ${amIReady ? 'READY' : 'PREPARE'}
             </button>` : ''}
           ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">RETREAT</button>` : ''}
         </div>`;
@@ -233,11 +229,13 @@
     const box = document.getElementById('nick-change-box');
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
   };
+
   window.applyNewNick = () => {
     const oldNick = getNick();
     const newNick = document.getElementById('newNickInput').value.trim();
     if (!newNick || oldNick === newNick) return;
     if (currentRoomId) {
+      db.ref('rooms/' + currentRoomId).update({ lastUpdate: Date.now() });
       db.ref('rooms/' + currentRoomId).transaction(r => {
         if(r) { if(r.p1===oldNick) r.p1=newNick; else if(r.p2===oldNick) r.p2=newNick; }
         return r;
@@ -246,46 +244,57 @@
     localStorage.setItem('nickname', newNick);
     location.reload();
   };
+
   window.leaveRoom = (rid) => {
     const nick = getNick();
-    db.ref('rooms/'+rid).transaction(r => {
+    db.ref('rooms/' + rid).transaction(r => {
       if(r) {
         if(r.p1===nick) { r.p1='EMPTY'; r.p1Ready=false; }
         else if(r.p2===nick) { r.p2='EMPTY'; r.p2Ready=false; }
-        if(r.p1==='EMPTY' && r.p2==='EMPTY') return null;
+        if(r.p1==='EMPTY' && r.p2==='EMPTY') return null; // 방 삭제
         r.status = 'WAITING';
+        r.lastUpdate = Date.now();
       }
       return r;
     });
   };
+
   window.tryJoin = (rid, slot) => {
     const nick = getNick();
-    if(currentRoomId && currentRoomId!==rid) return alert("YOU ARE ALREADY IN A DUEL");
-    db.ref('rooms/'+rid).transaction(r => {
+    if(currentRoomId && currentRoomId!==rid) return alert("ALREADY IN A DUEL");
+    db.ref('rooms/' + rid).transaction(r => {
       if(r && r.status!=='BATTLE') {
         if(r[slot]!=='EMPTY' && r[slot]!==nick) return;
         if(r.p1===nick) {r.p1='EMPTY'; r.p1Ready=false;}
         if(r.p2===nick) {r.p2='EMPTY'; r.p2Ready=false;}
         r[slot]=nick;
+        r.lastUpdate = Date.now();
       }
       return r;
     });
   };
+
   window.toggleReady = (rid, role) => {
-    db.ref('rooms/'+rid).transaction(r => {
+    db.ref('rooms/' + rid).transaction(r => {
       if(r) {
         if(role==='p1') r.p1Ready = !r.p1Ready;
         else r.p2Ready = !r.p2Ready;
         if(r.p1Ready && r.p2Ready) r.status = 'BATTLE';
+        r.lastUpdate = Date.now();
       }
       return r;
     });
   };
+
   document.getElementById('createRoomBtn').onclick = () => {
     const nick = getNick();
     if(!nick || currentRoomId) return;
-    db.ref('rooms/room_'+Date.now()).set({p1:nick, p2:'EMPTY', status:'WAITING', p1Ready:false, p2Ready:false});
+    db.ref('rooms/room_'+Date.now()).set({
+      p1: nick, p2: 'EMPTY', status: 'WAITING', 
+      p1Ready: false, p2Ready: false, lastUpdate: Date.now()
+    });
   };
+
   document.getElementById('registerBtn').onclick = () => {
     const v = document.getElementById('avatarId').value.trim();
     if(v) { localStorage.setItem('nickname', v); location.reload(); }
@@ -293,5 +302,3 @@
 </script>
 </body>
 </html>
-
-
