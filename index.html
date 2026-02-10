@@ -9,15 +9,20 @@
   <style>
     :root { 
       --bg-dark: #0d1117; --bg-panel: #161b22; --blue-accent: #58a6ff; 
-      --green-btn: #238636; --red-btn: #da3633; --orange-btn: #d16d00; --text-gray: #8b949e; --epl-gold: #f0883e; 
+      --green-btn: #238636; --red-btn: #da3633; --orange-btn: #d16d00; --gray-btn: #30363d; --epl-gold: #f0883e; 
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-dark); color: #c9d1d9; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
     .container { max-width: 500px; margin: auto; width: 100%; background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid #30363d; flex-grow: 1; }
-    header { text-align: center; margin-bottom: 20px; }
+    header { text-align: center; margin-bottom: 20px; position: relative; }
     h1 { color: var(--blue-accent); margin: 0; font-size: 1.6rem; text-transform: uppercase; }
     .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); display: inline-block; padding: 2px 15px; border-radius: 20px; margin-top: 8px; }
     
+    /* 닉네임 변경 UI */
+    .profile-area { background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #30363d; }
+    .current-nick { font-weight: bold; color: var(--blue-accent); font-size: 0.9rem; }
+    .change-link { font-size: 0.75rem; color: #8b949e; text-decoration: underline; cursor: pointer; }
+
     input, button { padding: 15px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: var(--bg-dark); color: #c9d1d9; outline: none; }
     button { background: var(--green-btn); color: white; border: none; cursor: pointer; font-weight: bold; }
     button:disabled { background: #21262d !important; color: #484f58 !important; cursor: not-allowed; opacity: 0.5; }
@@ -33,13 +38,13 @@
     .pvp-player.waiting { color: #484f58; border: 2px dashed #484f58; }
     
     .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .start-btn { background: var(--blue-accent); color: #000; flex: 2; min-width: 150px; }
+    .start-btn { background: var(--blue-accent); color: #000; flex: 2; min-width: 140px; }
     .start-btn.ready-active { background: var(--green-btn); color: #fff; }
     .stop-btn { background: var(--orange-btn); flex: 1; min-width: 100px; }
     .leave-btn { background: var(--red-btn); flex: 1; min-width: 80px; }
 
     .footer-area { padding: 20px 0; text-align: center; border-top: 1px solid #30363d; margin-top: 20px; }
-    .reset-btn { background: transparent; color: var(--text-gray); font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; border-radius: 20px; }
+    .reset-btn { background: transparent; color: #8b949e; font-size: 0.75rem; border: 1px solid #30363d; padding: 8px 20px; width: auto; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -58,6 +63,19 @@
   </div>
 
   <div id="lobby-section" style="display:none;">
+    <div class="profile-area">
+      <span class="current-nick" id="displayNick">Nickname: -</span>
+      <span class="change-link" onclick="toggleChangeNick()">Change ID</span>
+    </div>
+    
+    <div id="nick-change-box" style="display:none; margin-bottom:15px;">
+      <input type="text" id="newNickInput" placeholder="New Nickname" maxlength="12" style="margin-bottom:0;"/>
+      <div class="btn-group" style="margin-top:5px;">
+        <button onclick="applyNewNick()" style="padding:10px; font-size:14px;">Apply</button>
+        <button onclick="toggleChangeNick()" style="padding:10px; font-size:14px; background:var(--gray-btn);">Cancel</button>
+      </div>
+    </div>
+
     <button id="createRoomBtn">Create New Battle Room</button>
     <div id="roomContainer"></div>
   </div>
@@ -84,14 +102,18 @@
   const getNick = () => localStorage.getItem('nickname');
   let currentRoomId = null;
 
-  if (getNick()) {
-    document.getElementById('reg-section').style.display = 'none';
-    document.getElementById('lobby-section').style.display = 'block';
+  function initUI() {
+    const nick = getNick();
+    if (nick) {
+      document.getElementById('reg-section').style.display = 'none';
+      document.getElementById('lobby-section').style.display = 'block';
+      document.getElementById('displayNick').innerText = `Player: ${nick}`;
+    }
   }
+  initUI();
 
   db.ref(".info/connected").on("value", (snap) => {
-    const statusEl = document.getElementById('status');
-    statusEl.innerHTML = snap.val() ? `✅ Server Online | <b>${getNick() || 'Guest'}</b>` : `❌ Offline`;
+    document.getElementById('status').innerHTML = snap.val() ? `✅ Server Online` : `❌ Offline`;
   });
 
   db.ref('rooms').on('value', (snapshot) => {
@@ -115,7 +137,7 @@
       div.innerHTML = `
         <div class="room-info">
           <span>ID: ${id.slice(-4)}</span>
-          <span>${isInBattle ? "🔥 BATTLE IN PROGRESS" : "⏳ WAITING"}</span>
+          <span>${isInBattle ? "🔥 BATTLE" : "⏳ WAITING"}</span>
         </div>
         <div class="pvp-slots">
           <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${room.p1Ready ? 'ready' : ''}" 
@@ -137,26 +159,46 @@
     });
   });
 
-  // 배틀만 중지 (방에 남음)
-  window.stopBattle = (roomId) => {
-    db.ref('rooms/' + roomId).update({
-      status: 'WAITING',
-      p1Ready: false,
-      p2Ready: false
-    });
+  // 닉네임 변경 관련 함수
+  window.toggleChangeNick = () => {
+    const box = document.getElementById('nick-change-box');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
   };
 
-  // 방에서 완전히 나가기
+  window.applyNewNick = () => {
+    const oldNick = getNick();
+    const newNick = document.getElementById('newNickInput').value.trim();
+    if (!newNick || oldNick === newNick) return;
+
+    // 1. 참여 중인 방이 있다면 이름 교체 (Firebase 실시간 반영)
+    if (currentRoomId) {
+      db.ref('rooms/' + currentRoomId).transaction((room) => {
+        if (room) {
+          if (room.p1 === oldNick) room.p1 = newNick;
+          else if (room.p2 === oldNick) room.p2 = newNick;
+        }
+        return room;
+      });
+    }
+
+    // 2. 로컬 스토리지 업데이트 및 UI 갱신
+    localStorage.setItem('nickname', newNick);
+    document.getElementById('displayNick').innerText = `Player: ${newNick}`;
+    toggleChangeNick();
+    document.getElementById('newNickInput').value = '';
+  };
+
+  window.stopBattle = (roomId) => {
+    db.ref('rooms/' + roomId).update({ status: 'WAITING', p1Ready: false, p2Ready: false });
+  };
+
   window.leaveRoom = (roomId) => {
     const nick = getNick();
     db.ref('rooms/' + roomId).transaction((room) => {
       if (room) {
-        // 나갈 때 배틀 중이었다면 배틀도 중지시킴
         if (room.status === 'BATTLE') room.status = 'WAITING';
-        
         if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
         else if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
-
         if (room.p1 === 'EMPTY' && room.p2 === 'EMPTY') return null;
       }
       return room;
