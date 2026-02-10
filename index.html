@@ -18,6 +18,8 @@
       --border-color: #2a2a2a;
       --text-main: #ffffff;
       --text-dim: #888888;
+      --status-waiting: #444;
+      --status-battle: #ff3e3e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
@@ -42,14 +44,18 @@
     .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .room-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px 20px 20px; position: relative; }
     
-    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; background: #333; color: #888; }
+    .room-status { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.65rem; font-weight: 900; border-bottom-left-radius: 4px; }
+    .status-waiting-label { background: var(--status-waiting); color: #aaa; }
+    .status-battle-label { background: var(--status-battle); color: #fff; box-shadow: 0 0 10px rgba(255, 62, 62, 0.5); }
+
     .duel-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0; }
-    
     .player-slot { flex: 1; height: 65px; background: #000; border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; color: #444; }
     .player-slot.occupied { border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; font-family: 'Cinzel', serif; }
+    .player-slot.ready { background: rgba(255, 183, 3, 0.15); border-style: solid; box-shadow: inset 0 0 10px rgba(255,183,3,0.3); }
 
-    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; background: #333; color: #ccc; transition: 0.2s; }
-    .btn-room:hover { background: var(--accent-red); color: white; }
+    .btn-room { flex: 1; padding: 8px; border: none; font-weight: 800; font-family: 'Cinzel', serif; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
+    .btn-ready { background: var(--accent-gold); color: #000; }
+    .btn-retreat { background: #333; color: #ccc; }
     
     #auth-section { max-width: 400px; width: 100%; text-align: center; }
     input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: #fff; margin-bottom: 10px; text-align: center; font-family: 'Cinzel'; }
@@ -63,7 +69,7 @@
   </header>
 
   <div id="auth-section" class="card" style="display:none;">
-    <input type="text" id="avatarInput" placeholder="ENTER WARRIOR NAME" maxlength="12">
+    <input type="text" id="avatarInput" placeholder="ENTER E2V1 AVATAR NAME" maxlength="12">
     <button class="btn-create" style="width:100%" onclick="register()">FORGE AVATAR</button>
   </div>
 
@@ -72,7 +78,7 @@
       <div id="status" class="status-badge">⚡ ARENA CONNECTED</div>
       <div class="card">
         <h4 style="font-family:'Cinzel'; color:var(--accent-gold); margin-bottom:10px;">SYSTEM LOG</h4>
-        <p style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">브라우저를 닫으면 자동으로 전장에서 퇴장 처리됩니다. 빈 전장은 즉시 소멸합니다.</p>
+        <p style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">두 아바타가 모두 READY를 누르면 BATTLE 상태가 됩니다. 창을 닫으면 자동 퇴장 처리됩니다.</p>
       </div>
     </div>
 
@@ -123,7 +129,7 @@
 
   function register() {
     const val = document.getElementById('avatarInput').value.trim().toUpperCase();
-    if (val && val !== 'EMPTY' && val !== 'UNDEFINED') {
+    if (val && val !== 'EMPTY' && val.toLowerCase() !== 'undefined') {
       localStorage.setItem('arena_avatar', val);
       location.reload();
     }
@@ -140,16 +146,17 @@
       const myRoomId = Object.keys(rooms).find(id => rooms[id].p1 === avatar || rooms[id].p2 === avatar);
       document.getElementById('createRoomBtn').disabled = !!myRoomId;
 
-      // 🛡️ [추가] 브라우저 종료 시 자동 퇴장 로직
+      // 🛡️ 브라우저 종료 시 자동 퇴장 및 READY 해제
       if (myRoomId) {
         const myRole = (rooms[myRoomId].p1 === avatar) ? 'p1' : 'p2';
         db.ref(`rooms/${myRoomId}/${myRole}`).onDisconnect().set('EMPTY');
+        db.ref(`rooms/${myRoomId}/${myRole}Ready`).onDisconnect().set(false);
       }
 
       Object.keys(rooms).forEach(id => {
         const r = rooms[id];
         
-        // 🛡️ [추가] 빈 방 자동 삭제 (p1, p2 모두 비어있거나 'EMPTY' 글자일 경우)
+        // 🛡️ 빈 방 자동 삭제
         const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1.toLowerCase() === 'undefined');
         const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2.toLowerCase() === 'undefined');
 
@@ -158,21 +165,25 @@
           return;
         }
 
-        const myRoleInThisRoom = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
+        const myRole = (r.p1 === avatar) ? 'p1' : (r.p2 === avatar ? 'p2' : null);
+        const isBattle = r.status === 'BATTLE';
 
         const div = document.createElement('div');
         div.className = 'room-card';
         div.innerHTML = `
-          <div class="room-status">WAITING</div>
+          <div class="room-status ${isBattle ? 'status-battle-label' : 'status-waiting-label'}">${r.status || 'WAITING'}</div>
           <div class="duel-area">
-            <div class="player-slot ${!p1Empty ? 'occupied' : ''}" 
+            <div class="player-slot ${!p1Empty ? 'occupied' : ''} ${r.p1Ready ? 'ready' : ''}" 
                  onclick="${!myRoomId ? `join('${id}','p1')` : ''}">${r.p1 || 'EMPTY'}</div>
             <div style="color:var(--accent-red); font-weight:900; font-family:'Cinzel';">VS</div>
-            <div class="player-slot ${!p2Empty ? 'occupied' : ''}" 
+            <div class="player-slot ${!p2Empty ? 'occupied' : ''} ${r.p2Ready ? 'ready' : ''}" 
                  onclick="${!myRoomId ? `join('${id}','p2')` : ''}">${r.p2 || 'EMPTY'}</div>
           </div>
           <div style="display:flex; gap:10px;">
-            ${myRoleInThisRoom ? `<button class="btn-room" onclick="leave('${id}')">RETREAT</button>` : ''}
+            ${myRole ? `
+              <button class="btn-room btn-ready" onclick="toggleReady('${id}','${myRole}')">${r[myRole+'Ready']?'CANCEL':'READY'}</button>
+              <button class="btn-room btn-retreat" onclick="leave('${id}')">RETREAT</button>
+            ` : ''}
           </div>
         `;
         container.appendChild(div);
@@ -184,21 +195,35 @@
     const avatar = getAvatar();
     if (!avatar) return;
     const newRef = db.ref('rooms').push();
-    newRef.set({ p1: avatar, p2: 'EMPTY', status: 'WAITING' });
+    newRef.set({ p1: avatar, p2: 'EMPTY', p1Ready: false, p2Ready: false, status: 'WAITING' });
   }
 
   window.join = (rid, slot) => {
     const avatar = getAvatar();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        // 이미 주인이 있으면 취소
-        if (r[slot] !== 'EMPTY' && r[slot] !== undefined && r[slot] !== 'undefined') return r;
-        
-        // 내가 다른 슬롯에 있었다면 비우기
-        if (r.p1 === avatar) r.p1 = 'EMPTY';
-        if (r.p2 === avatar) r.p2 = 'EMPTY';
+        const isSlotAvailable = (!r[slot] || r[slot] === 'EMPTY' || r[slot].toLowerCase() === 'undefined');
+        if (!isSlotAvailable) return r;
+
+        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
 
         r[slot] = avatar;
+        r[slot + 'Ready'] = false;
+        r.status = 'WAITING';
+      }
+      return r;
+    });
+  };
+
+  window.toggleReady = (rid, role) => {
+    db.ref(`rooms/${rid}`).transaction(r => {
+      if (r) {
+        r[role + 'Ready'] = !r[role + 'Ready'];
+        // 양쪽 모두 존재하고 둘 다 Ready일 때만 BATTLE
+        const p1Valid = (r.p1 && r.p1 !== 'EMPTY');
+        const p2Valid = (r.p2 && r.p2 !== 'EMPTY');
+        r.status = (p1Valid && p2Valid && r.p1Ready && r.p2Ready) ? 'BATTLE' : 'WAITING';
       }
       return r;
     });
@@ -208,13 +233,13 @@
     const avatar = getAvatar();
     db.ref(`rooms/${rid}`).transaction(r => {
       if (r) {
-        if (r.p1 === avatar) r.p1 = 'EMPTY';
-        if (r.p2 === avatar) r.p2 = 'EMPTY';
+        if (r.p1 === avatar) { r.p1 = 'EMPTY'; r.p1Ready = false; }
+        else if (r.p2 === avatar) { r.p2 = 'EMPTY'; r.p2Ready = false; }
 
-        // 둘 다 비었으면 null 반환하여 방 완전 삭제
         const p1Empty = (!r.p1 || r.p1 === 'EMPTY' || r.p1.toLowerCase() === 'undefined');
         const p2Empty = (!r.p2 || r.p2 === 'EMPTY' || r.p2.toLowerCase() === 'undefined');
         if (p1Empty && p2Empty) return null;
+        r.status = 'WAITING';
       }
       return r;
     });
