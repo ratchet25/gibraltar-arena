@@ -17,7 +17,9 @@
     .main-container { width:100%; max-width:1100px; display:grid; grid-template-columns:320px 1fr; gap:30px; }
     @media (max-width:900px) { .main-container { grid-template-columns:1fr; } }
     .card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:4px; padding:25px; }
-    .status-badge { background:#000; border-left:4px solid var(--accent-gold); padding:12px 20px; font-size:0.75rem; font-weight:800; color:var(--accent-gold); margin-bottom:20px;}
+    .status-badge { background:#000; border-left:4px solid var(--accent-gold); padding:12px 20px; font-size:0.75rem; font-weight:800; color:var(--accent-gold); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+    .live-dot { height: 8px; width: 8px; background-color: var(--accent-gold); border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px var(--accent-gold); animation: blink 1.5s infinite; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     .avatar-profile { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
     .avatar-info h2 { font-family:'Cinzel', serif; color:var(--accent-gold); font-size:1.8rem; }
     .btn-create { background:var(--accent-red); border:none; color:white; padding:10px 20px; font-family:'Cinzel', serif; font-weight:900; cursor:pointer; border-radius:4px; }
@@ -48,11 +50,15 @@
 
   <div id="lobby-section" class="main-container" style="display:none;">
     <div class="sidebar">
-      <div class="status-badge">⚡ ARENA CONNECTED</div>
+      <div class="status-badge">
+        <span><span class="live-dot"></span>ARENA CONNECTED</span>
+        <span id="userCount" style="color:#fff;">0 ACTIVE</span>
+      </div>
+      
       <div class="card">
         <h4 style="font-family:'Cinzel'; color:var(--accent-red); margin-bottom:15px; font-size:0.9rem; letter-spacing:2px;">RULES</h4>
         <div style="font-size:0.75rem; color:var(--text-dim); line-height:1.8;">
-          <p style="color:var(--accent-gold); font-weight:800; margin-bottom:10px;">Before the duel begins, teleport your avatar to 'gibraltar' EPL in E2V1.</p>
+          <p style="color:var(--accent-gold); font-weight:800; margin-bottom:10px;">Before the duel begins, transfer your avatar to 'Gibraltar' EPL in E2V1.</p>
           <p>1. Forge your name.</p>
           <p>2. Join an empty slot.</p>
           <p>3. Mark READY to duel.</p>
@@ -80,7 +86,6 @@
   let db;
   let allRoomsData = {};
   const getAvatar = () => localStorage.getItem('arena_avatar');
-  // 고유 ID (UID) 가져오기 또는 생성
   const getUID = () => {
     let uid = localStorage.getItem('arena_uid');
     if (!uid) {
@@ -113,15 +118,32 @@
       document.getElementById('auth-section').style.display = 'none';
       document.getElementById('lobby-section').style.display = 'grid';
       document.getElementById('avatarDisplay').innerText = avatar;
+      setupPresence(); // 사용자 추적 시작
       startLobby();
     } else { document.getElementById('auth-section').style.display = 'block'; }
+  }
+
+  // 실시간 사용자 추적 로직
+  function setupPresence() {
+    const myUID = getUID();
+    const userRef = db.ref('presence/' + myUID);
+    
+    // 접속 시 presence에 UID 추가 및 종료 시 제거
+    userRef.set(true);
+    userRef.onDisconnect().remove();
+
+    // 전체 presence 카운팅
+    db.ref('presence').on('value', snap => {
+      const count = snap.numChildren();
+      document.getElementById('userCount').innerText = `${count} ACTIVE`;
+    });
   }
 
   function register() {
     const val = document.getElementById('avatarInput').value.trim().toUpperCase();
     if (val && val !== 'EMPTY') {
       localStorage.setItem('arena_avatar', val);
-      getUID(); // UID 생성 보장
+      getUID();
       location.reload();
     }
   }
@@ -254,4 +276,3 @@
 </script>
 </body>
 </html>
-
