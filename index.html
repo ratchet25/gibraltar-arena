@@ -17,64 +17,72 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { 
       background: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif;
-      margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px;
+      margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center;
     }
     
-    .main-wrapper { 
-      max-width: 1000px; width: 100%; display: grid; grid-template-columns: 1fr; gap: 20px;
-    }
+    .main-wrapper { max-width: 1000px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
-    /* 가로 레이아웃 대응 (데스크탑) */
+    /* 데스크탑에서만 가로 레이아웃 적용 (850px 이상) */
     @media (min-width: 850px) {
-      .main-wrapper { grid-template-columns: 350px 1fr; align-items: start; }
-      header { grid-column: span 2; }
+      .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+      header { text-align: left; padding-left: 10px; }
     }
     
-    header { text-align: center; margin-bottom: 10px; }
-    h1 { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); margin: 0; font-size: 2rem; letter-spacing: 3px; text-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
-    .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--epl-gold); padding: 4px 20px; border-radius: 50px; margin-top: 10px; display: inline-block; background: rgba(240, 136, 62, 0.1); }
+    header { text-align: center; margin-bottom: 10px; width: 100%; }
+    h1 { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
+    .location-tag { color: var(--epl-gold); font-weight: bold; font-size: 0.75rem; border: 1px solid var(--epl-gold); padding: 3px 15px; border-radius: 50px; margin-top: 8px; display: inline-block; background: rgba(240, 136, 62, 0.1); }
 
-    /* Left Panel (Side) */
-    .side-panel { display: flex; flex-direction: column; gap: 20px; }
+    /* Left Side: Side Panel */
+    .side-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; }
 
-    .guide-box { background: rgba(0, 212, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 15px; padding: 20px; border-left: 5px solid var(--blue-neon); }
-    .guide-title { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); font-weight: bold; font-size: 0.9rem; margin-bottom: 12px; display: block; }
-    .guide-text { color: var(--text-dim); font-size: 0.85rem; line-height: 1.8; }
-    .guide-text b { color: var(--text-main); }
+    /* Card Common Styling */
+    .card { background: var(--bg-panel); border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 
-    /* Right Panel (Main Content) */
-    .content-panel { background: var(--bg-panel); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; min-height: 500px; }
+    .guide-box { border-left: 4px solid var(--blue-neon); background: rgba(0, 212, 255, 0.02); }
+    .guide-title { font-family: 'Orbitron', sans-serif; color: var(--blue-neon); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; display: block; }
+    .guide-text { color: var(--text-dim); font-size: 0.85rem; line-height: 1.6; }
 
-    #status { margin-bottom: 15px; padding: 10px; border-radius: 8px; font-size: 0.75rem; text-align: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+    /* Right Side: Main Content */
+    .main-content { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
-    .profile-area { background: #161b22; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #30363d; }
-    .current-nick { font-weight: bold; color: var(--green-neon); font-size: 1rem; }
-    .change-link { font-size: 0.75rem; color: var(--text-dim); cursor: pointer; border-bottom: 1px solid var(--text-dim); }
+    #status { padding: 8px; border-radius: 8px; font-size: 0.7rem; text-align: center; background: #000; border: 1px solid #222; margin-bottom: 10px; }
 
-    input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border-radius: 10px; border: 1px solid #30363d; background: #05070a; color: white; }
-    button { padding: 16px; margin: 8px 0; font-size: 15px; width: 100%; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
-    .primary-btn { background: var(--blue-neon); color: #000; box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2); }
-    .primary-btn:disabled { background: #21262d; color: #484f58; box-shadow: none; cursor: not-allowed; }
+    /* 아이디 설정 카드 (Profile Card) */
+    .profile-card { border-top: 3px solid var(--green-neon); }
+    .profile-area { display: flex; justify-content: space-between; align-items: center; }
+    .nick-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .current-nick { font-family: 'Orbitron', sans-serif; font-weight: bold; color: var(--green-neon); font-size: 1.1rem; display: block; }
+    .edit-btn { font-size: 0.75rem; color: var(--blue-neon); cursor: pointer; text-decoration: underline; }
 
-    /* Room Card - 가로 최적화 */
-    .pvp-room { background: #1c2128; margin-bottom: 20px; padding: 20px; border-radius: 15px; border: 1px solid #30363d; transition: 0.3s; }
-    .pvp-room.battle-active { border-color: var(--blue-neon); box-shadow: 0 0 15px rgba(0, 212, 255, 0.1); }
-    .room-header { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 15px; color: var(--text-dim); font-family: 'Orbitron', sans-serif; }
+    /* 배틀 아레나 카드 (Battle Arena Card) */
+    .arena-card { border-top: 3px solid var(--blue-neon); flex-grow: 1; }
+    .arena-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--blue-neon); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+    input { padding: 14px; margin: 10px 0; font-size: 15px; width: 100%; border-radius: 10px; border: 1px solid #30363d; background: #05070a; color: white; outline: none; }
+    input:focus { border-color: var(--blue-neon); }
+
+    button { padding: 14px; margin: 8px 0; font-size: 14px; width: 100%; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
+    .primary-btn { background: var(--blue-neon); color: #000; }
+    .primary-btn:disabled { background: #1c2128; color: #484f58; cursor: not-allowed; }
+
+    /* Room 디자인 최적화 */
+    .pvp-room { background: #161b22; margin-bottom: 15px; padding: 15px; border-radius: 12px; border: 1px solid #30363d; }
+    .pvp-room.battle-active { border-color: var(--blue-neon); box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
     
-    .pvp-slots { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-    .pvp-player { flex: 1; height: 80px; background: #0d1117; border-radius: 12px; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .pvp-player.ready { border-color: var(--green-neon); color: var(--green-neon); background: rgba(57, 255, 20, 0.02); }
-    .vs-icon { color: var(--red-neon); font-family: 'Orbitron', sans-serif; font-style: italic; font-size: 1.2rem; }
+    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+    .pvp-player { flex: 1; height: 60px; background: #05070a; border-radius: 8px; border: 2px solid #222; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
+    .pvp-player.ready { border-color: var(--green-neon); color: var(--green-neon); }
+    .vs-text { color: var(--red-neon); font-weight: bold; font-style: italic; font-size: 0.9rem; }
 
-    .btn-group { display: flex; gap: 10px; }
-    .start-btn { background: var(--blue-neon); color: black; flex: 2; }
+    .btn-group { display: flex; gap: 8px; }
+    .btn-group button { padding: 10px; font-size: 0.8rem; margin: 0; }
+    .start-btn { background: var(--blue-neon); color: #000; flex: 2; }
     .start-btn.ready-active { background: var(--green-neon); }
-    .stop-btn { background: var(--orange-neon); flex: 1; }
-    .leave-btn { background: var(--red-neon); color: white; flex: 1; }
+    .stop-btn { background: var(--orange-neon); color: #000; flex: 1; }
+    .leave-btn { background: var(--red-neon); color: #fff; flex: 1; }
 
-    .footer-area { grid-column: span 2; text-align: center; padding: 40px 0; }
-    .disclaimer { font-size: 0.7rem; color: #484f58; max-width: 800px; margin: 20px auto; line-height: 1.6; }
-    .reset-btn { background: transparent; color: #484f58; border: 1px solid #30363d; padding: 8px 15px; font-size: 0.7rem; border-radius: 5px; width: auto; }
+    .footer-area { width: 100%; text-align: center; padding: 20px 0; }
+    .disclaimer { font-size: 0.65rem; color: #484f58; line-height: 1.5; margin-top: 10px; padding: 0 10px; }
   </style>
 </head>
 <body>
@@ -85,60 +93,72 @@
     <div class="location-tag">📍 EPL: GIBRALTAR</div>
   </header>
 
-  <div class="side-panel">
-    <div class="guide-box">
-      <span class="guide-title">🚀 MISSION GUIDE</span>
-      <div class="guide-text">
-        1. Register your ID and head to <b>'Gibraltar EPL'</b> in E2V1.<br><br>
-        2. Teleport to the zone to initiate <b>battle</b>.<br><br>
-        3. Use this arena to find your perfect <b>battle partner</b>.
-      </div>
-    </div>
-    
-    <div id="status">INITIATING...</div>
-
-    <div class="disclaimer" style="text-align: left; margin: 0;">
-      <b>NOTICE:</b> Community tool for E2V1 players. We comply with E2V1 ToS. No direct financial rewards provided.
-    </div>
-  </div>
-
-  <div class="content-panel">
-    <div id="reg-section">
-      <input type="text" id="avatarId" placeholder="ENTER PLAYER NICKNAME" maxlength="12" />
-      <button class="primary-btn" id="registerBtn">JOIN ARENA</button>
-    </div>
-
-    <div id="lobby-section" style="display:none;">
-      <div class="profile-area">
-        <div>
-          <span style="font-size: 0.7rem; color: var(--text-dim); display: block;">ACTIVE PLAYER</span>
-          <span class="current-nick" id="displayNick">-</span>
+  <div class="layout-container">
+    <div class="side-panel">
+      <div id="status">INITIATING...</div>
+      
+      <div class="card guide-box">
+        <span class="guide-title">🚀 MISSION GUIDE</span>
+        <div class="guide-text">
+          1. Register ID and head to <b>'Gibraltar EPL'</b> in E2V1.<br><br>
+          2. Teleport to the zone to initiate <b>battle</b>.<br><br>
+          3. Use this arena to find your perfect <b>battle partner</b>.
         </div>
-        <span class="change-link" onclick="toggleChangeNick()">EDIT ID</span>
       </div>
       
-      <div id="nick-change-box" style="display:none; margin-bottom:20px;">
-        <input type="text" id="newNickInput" placeholder="NEW NICKNAME" maxlength="12" />
-        <div class="btn-group">
-          <button class="primary-btn" onclick="applyNewNick()" style="padding:10px;">APPLY</button>
-          <button onclick="toggleChangeNick()" style="padding:10px; background:var(--gray-btn); color:white; border:1px solid #444;">CANCEL</button>
+      <div class="disclaimer">
+        <b>NOTICE:</b> Community tool for E2V1. We comply with ToS. No financial rewards provided directly.
+      </div>
+    </div>
+
+    <div class="main-content">
+      
+      <div id="reg-section" class="card profile-card">
+        <span class="guide-title" style="color:var(--green-neon)">IDENTITY SETUP</span>
+        <input type="text" id="avatarId" placeholder="ENTER PLAYER NICKNAME" maxlength="12" />
+        <button class="primary-btn" id="registerBtn" style="background:var(--green-neon)">START ENGINE</button>
+      </div>
+
+      <div id="lobby-section" style="display:none;" class="main-content">
+        <div class="card profile-card">
+          <div class="profile-area">
+            <div>
+              <span class="nick-label">Active Pilot</span>
+              <span class="current-nick" id="displayNick">-</span>
+            </div>
+            <span class="edit-btn" onclick="toggleChangeNick()">CHANGE ID</span>
+          </div>
+          
+          <div id="nick-change-box" style="display:none; margin-top:15px;">
+            <input type="text" id="newNickInput" placeholder="NEW NICKNAME" maxlength="12" />
+            <div class="btn-group">
+              <button class="primary-btn" onclick="applyNewNick()" style="background:var(--green-neon)">APPLY</button>
+              <button onclick="toggleChangeNick()" style="background:#222; color:white;">CANCEL</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card arena-card">
+          <div class="arena-title">
+            <span>BATTLE ARENA</span>
+            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 15px; margin:0; font-size:0.7rem;">+ CREATE ROOM</button>
+          </div>
+          
+          <div id="roomContainer">
+            </div>
         </div>
       </div>
 
-      <button class="primary-btn" id="createRoomBtn">CREATE BATTLE ROOM</button>
-      
-      <div id="roomContainer" style="margin-top: 20px;">
-        </div>
     </div>
   </div>
 
   <div class="footer-area">
-    <button class="reset-btn" id="softResetBtn">🔄 REFRESH CONNECTION</button>
+    <button onclick="db.goOffline(); setTimeout(()=>db.goOnline(),500)" style="background:transparent; color:#444; border:1px solid #222; width:auto; padding:5px 15px; font-size:0.7rem;">🔄 RESET CONNECTION</button>
   </div>
 </div>
 
 <script>
-  // (Firebase Config & Logic remains the same to ensure stability)
+  // (Firebase Logic - Previous stable version)
   const firebaseConfig = {
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo",
     authDomain: "gibraltar-live.firebaseapp.com",
@@ -151,7 +171,6 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
   const getNick = () => localStorage.getItem('nickname');
   let currentRoomId = null;
 
@@ -159,7 +178,7 @@
     const nick = getNick();
     if (nick) {
       document.getElementById('reg-section').style.display = 'none';
-      document.getElementById('lobby-section').style.display = 'block';
+      document.getElementById('lobby-section').style.display = 'flex';
       document.getElementById('displayNick').innerText = nick;
     }
   }
@@ -176,9 +195,8 @@
     const container = document.getElementById('roomContainer');
     container.innerHTML = '';
     const nick = getNick();
-    
     currentRoomId = Object.keys(rooms).find(id => rooms[id].p1 === nick || rooms[id].p2 === nick) || null;
-    document.getElementById('createRoomBtn').disabled = !!currentRoomId || !nick;
+    document.getElementById('createRoomBtn').disabled = !!currentRoomId;
 
     Object.keys(rooms).forEach(id => {
       const room = rooms[id];
@@ -190,20 +208,14 @@
       const div = document.createElement('div');
       div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
-        <div class="room-header">
-          <span>ROOM ID: ${id.slice(-4)}</span>
-          <span style="color:${isInBattle ? 'var(--blue-neon)' : 'var(--text-dim)'}">
-            ${isInBattle ? '● IN BATTLE' : '● WAITING'}
-          </span>
+        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--text-dim); font-family:'Orbitron'">
+          <span>#${id.slice(-4)}</span>
+          <span>${isInBattle ? 'IN BATTLE' : 'WAITING'}</span>
         </div>
         <div class="pvp-slots">
-          <div class="pvp-player ${p1 === 'EMPTY' ? 'waiting' : ''} ${room.p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">
-            ${p1}
-          </div>
-          <div class="vs-icon">VS</div>
-          <div class="pvp-player ${p2 === 'EMPTY' ? 'waiting' : ''} ${room.p2Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p2')">
-            ${p2}
-          </div>
+          <div class="pvp-player ${room.p1Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
+          <div class="vs-text">VS</div>
+          <div class="pvp-player ${room.p2Ready ? 'ready' : ''}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
         </div>
         <div class="btn-group">
           ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? 
@@ -212,8 +224,7 @@
             </button>` : ''}
           ${(myRole && isInBattle) ? `<button class="stop-btn" onclick="stopBattle('${id}')">STOP</button>` : ''}
           ${myRole ? `<button class="leave-btn" onclick="leaveRoom('${id}')">EXIT</button>` : ''}
-        </div>
-      `;
+        </div>`;
       container.appendChild(div);
     });
   });
@@ -222,89 +233,63 @@
     const box = document.getElementById('nick-change-box');
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
   };
-
   window.applyNewNick = () => {
     const oldNick = getNick();
     const newNick = document.getElementById('newNickInput').value.trim();
     if (!newNick || oldNick === newNick) return;
     if (currentRoomId) {
-      db.ref('rooms/' + currentRoomId).transaction((room) => {
-        if (room) {
-          if (room.p1 === oldNick) room.p1 = newNick;
-          else if (room.p2 === oldNick) room.p2 = newNick;
-        }
-        return room;
+      db.ref('rooms/' + currentRoomId).transaction(r => {
+        if(r) { if(r.p1===oldNick) r.p1=newNick; else if(r.p2===oldNick) r.p2=newNick; }
+        return r;
       });
     }
     localStorage.setItem('nickname', newNick);
-    document.getElementById('displayNick').innerText = newNick;
-    toggleChangeNick();
-    document.getElementById('newNickInput').value = '';
+    location.reload();
   };
-
-  window.stopBattle = (roomId) => {
-    db.ref('rooms/' + roomId).update({ status: 'WAITING', p1Ready: false, p2Ready: false });
-  };
-
-  window.leaveRoom = (roomId) => {
+  window.stopBattle = (rid) => db.ref('rooms/'+rid).update({status:'WAITING', p1Ready:false, p2Ready:false});
+  window.leaveRoom = (rid) => {
     const nick = getNick();
-    db.ref('rooms/' + roomId).transaction((room) => {
-      if (room) {
-        if (room.status === 'BATTLE') room.status = 'WAITING';
-        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
-        else if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
-        if (room.p1 === 'EMPTY' && room.p2 === 'EMPTY') return null;
+    db.ref('rooms/'+rid).transaction(r => {
+      if(r) {
+        if(r.p1===nick) { r.p1='EMPTY'; r.p1Ready=false; }
+        else if(r.p2===nick) { r.p2='EMPTY'; r.p2Ready=false; }
+        if(r.p1==='EMPTY' && r.p2==='EMPTY') return null;
+        r.status = 'WAITING';
       }
-      return room;
+      return r;
     });
   };
-
-  window.tryJoin = (roomId, slot) => {
+  window.tryJoin = (rid, slot) => {
     const nick = getNick();
-    if (!nick) return;
-    if (currentRoomId && currentRoomId !== roomId) {
-      alert("ALREADY IN A ROOM");
-      return;
-    }
-    db.ref('rooms/' + roomId).transaction((room) => {
-      if (room && room.status !== 'BATTLE') {
-        if (room[slot] !== 'EMPTY' && room[slot] !== nick) return;
-        if (room.p1 === nick) { room.p1 = 'EMPTY'; room.p1Ready = false; }
-        if (room.p2 === nick) { room.p2 = 'EMPTY'; room.p2Ready = false; }
-        room[slot] = nick;
+    if(currentRoomId && currentRoomId!==rid) return alert("ALREADY IN A ROOM");
+    db.ref('rooms/'+rid).transaction(r => {
+      if(r && r.status!=='BATTLE') {
+        if(r[slot]!=='EMPTY' && r[slot]!==nick) return;
+        if(r.p1===nick) {r.p1='EMPTY'; r.p1Ready=false;}
+        if(r.p2===nick) {r.p2='EMPTY'; r.p2Ready=false;}
+        r[slot]=nick;
       }
-      return room;
+      return r;
     });
   };
-
-  window.toggleReady = (roomId, role) => {
-    db.ref('rooms/' + roomId).transaction((room) => {
-      if (room) {
-        if (role === 'p1') room.p1Ready = !room.p1Ready;
-        if (role === 'p2') room.p2Ready = !room.p2Ready;
-        if (room.p1Ready && room.p2Ready) room.status = 'BATTLE';
+  window.toggleReady = (rid, role) => {
+    db.ref('rooms/'+rid).transaction(r => {
+      if(r) {
+        if(role==='p1') r.p1Ready = !r.p1Ready;
+        else r.p2Ready = !r.p2Ready;
+        if(r.p1Ready && r.p2Ready) r.status = 'BATTLE';
       }
-      return room;
+      return r;
     });
   };
-
-  document.getElementById('createRoomBtn').onclick = function() {
+  document.getElementById('createRoomBtn').onclick = () => {
     const nick = getNick();
-    if (!nick || currentRoomId) return;
-    const roomId = "room_" + Date.now();
-    db.ref('rooms/' + roomId).set({ 
-      p1: nick, p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false 
-    });
+    if(!nick || currentRoomId) return;
+    db.ref('rooms/room_'+Date.now()).set({p1:nick, p2:'EMPTY', status:'WAITING', p1Ready:false, p2Ready:false});
   };
-
   document.getElementById('registerBtn').onclick = () => {
-    const val = document.getElementById('avatarId').value.trim();
-    if (val) { localStorage.setItem('nickname', val); location.reload(); }
-  };
-
-  document.getElementById('softResetBtn').onclick = function() {
-    db.goOffline();
-    setTimeout(() => { db.goOnline(); }, 500);
+    const v = document.getElementById('avatarId').value.trim();
+    if(v) { localStorage.setItem('nickname', v); location.reload(); }
   };
 </script>
 </body>
