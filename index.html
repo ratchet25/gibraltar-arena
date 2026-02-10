@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Gibraltar Arena | Inferno</title>
+  <title>Gibraltar Arena | Frozen Inferno</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
@@ -18,61 +18,64 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { 
       background: var(--bg-stone); color: var(--text-light); font-family: 'Noto Sans KR', sans-serif;
-      margin: 0; min-height: 100vh; padding: 15px; display: flex; flex-direction: column; align-items: center;
+      margin: 0; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center;
       background-image: radial-gradient(circle at center, #2a1a15 0%, #1a1614 100%);
     }
     
     .main-wrapper { max-width: 1200px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
-    @media (min-width: 900px) { .layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; } }
+    @media (min-width: 1000px) { .layout-container { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: start; } }
     
-    header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--fire-red); padding-bottom: 10px; }
-    h1 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 2.2rem; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px var(--fire-red); }
-    .location-tag { color: var(--fire-orange); font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: block; text-transform: uppercase; }
+    header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--fire-red); padding-bottom: 15px; }
+    h1 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 2.5rem; letter-spacing: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px var(--fire-red); }
+    .location-tag { color: var(--fire-orange); font-weight: bold; font-size: 0.9rem; margin-top: 8px; display: block; text-transform: uppercase; letter-spacing: 1px; }
 
-    .card { background: var(--card-iron); border-radius: 8px; border: 2px solid var(--border-metal); padding: 20px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.4); }
-    .guide-box { border-left: 4px solid var(--fire-red); background: rgba(255, 69, 0, 0.05); }
-    .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.1rem; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 5px; }
-    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.7; }
-
-    #status { padding: 10px; border-radius: 4px; font-size: 0.8rem; text-align: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); font-weight: bold; margin-bottom: 10px; }
+    .card { background: var(--card-iron); border-radius: 12px; border: 2px solid var(--border-metal); padding: 25px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.4); }
     
-    input { padding: 15px; margin: 10px 0; font-size: 16px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 4px; }
-    button { padding: 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.3s; font-size: 1rem; }
+    /* 🛡️ 프로필 카드 높이 완전 고정 */
+    .profile-card { height: 165px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; position: relative; }
+    
+    .guide-box { border-left: 5px solid var(--fire-red); background: rgba(255, 69, 0, 0.05); }
+    .guide-title { font-family: 'Cinzel', serif; color: var(--fire-orange); font-size: 1.2rem; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--border-metal); padding-bottom: 8px; }
+    .guide-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.8; }
+
+    #status { padding: 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; background: #000; color: var(--gold); border: 1px solid var(--fire-red); font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
+    
+    input { padding: 12px; margin: 8px 0; font-size: 15px; width: 100%; border: 2px solid var(--border-metal); background: #120e0c; color: #fff; border-radius: 6px; outline: none; }
+    button { padding: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; font-family: 'Cinzel', serif; transition: 0.2s; font-size: 0.9rem; }
     .primary-btn { background: linear-gradient(to bottom, var(--fire-orange), var(--fire-red)); color: white; width: 100%; }
+    .primary-btn:hover { filter: brightness(1.2); }
     .primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-    /* 🛡️ 고정된 방 인스턴스 스타일 */
+    /* 🛡️ 방 인스턴스: 280px 절대 고정 */
+    #roomContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
     .pvp-room { 
-      background: #251e1a; padding: 20px; border-radius: 4px; border: 2px solid var(--border-metal); 
-      min-height: 230px; /* 높이 고정 */
-      display: flex; flex-direction: column; justify-content: space-between;
+      background: #251e1a; padding: 20px; border-radius: 8px; border: 2px solid var(--border-metal); 
+      height: 280px; display: flex; flex-direction: column; justify-content: space-between;
     }
     .pvp-room.battle-active { border-color: var(--fire-red); animation: flame-pulse 1.5s infinite ease-in-out; background: #2d1610; }
-    @keyframes flame-pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); } 50% { box-shadow: 0 0 25px rgba(255, 69, 0, 0.8); } }
+    @keyframes flame-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); } 50% { box-shadow: 0 0 30px rgba(255, 69, 0, 0.7); } }
 
-    .pvp-slots { display: flex; align-items: center; gap: 10px; margin: 15px 0; height: 70px; }
+    .pvp-slots { display: flex; align-items: center; gap: 12px; margin: 15px 0; height: 80px; }
     .pvp-player { 
-      flex: 1; height: 65px; border-radius: 4px; display: flex; align-items: center; justify-content: center; 
-      font-weight: bold; font-size: 0.9rem; transition: 0.3s; cursor: pointer;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 5px;
+      flex: 1; height: 75px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+      font-weight: bold; font-size: 0.95rem; cursor: pointer; border: 1px solid transparent; overflow: hidden;
     }
+    .player-name { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 8px; text-align: center; }
+    
     .slot-empty { background: var(--slot-empty); border: 1px dashed var(--border-metal); color: #444; }
     .slot-occupied { background: var(--slot-occupied); border: 1px solid var(--fire-orange); color: var(--text-light); }
     .slot-ready { background: rgba(255, 215, 0, 0.15); border: 2px solid var(--gold); color: var(--gold); animation: shake 0.5s infinite; }
-    @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px,1px); } 50% { transform: translate(-1px,-1px); } }
+    @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } }
 
-    .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.2rem; }
+    .vs-text { font-family: 'Cinzel', serif; color: var(--fire-red); font-weight: bold; font-size: 1.4rem; }
 
-    /* 🛡️ 버튼 영역 고정 */
-    .btn-container { height: 45px; display: flex; align-items: flex-end; }
+    /* 하단 액션 영역 고정 */
+    .action-area { height: 50px; display: flex; align-items: center; justify-content: center; }
     .btn-group { display: flex; gap: 8px; width: 100%; }
-    .btn-group button { padding: 10px; font-size: 0.8rem; flex: 1; height: 40px; }
+    .btn-group button { flex: 1; height: 42px; font-size: 0.8rem; }
+    .leave-btn { background: #444; color: #fff; }
 
-    #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.4); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
-    
-    #roomContainer { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    @media (min-width: 650px) { #roomContainer { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1100px) { #roomContainer { grid-template-columns: repeat(3, 1fr); } }
+    #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.5); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
   </style>
 </head>
 <body>
@@ -99,7 +102,7 @@
     </div>
 
     <div class="main-content">
-      <div id="reg-section" class="card profile-card">
+      <div id="reg-section" class="card">
         <span class="guide-title">ENTER THE GATES</span>
         <input type="text" id="avatarId" placeholder="YOUR WARRIOR NAME" maxlength="12" />
         <button class="primary-btn" id="registerBtn">CLAIM IDENTITY</button>
@@ -107,26 +110,27 @@
 
       <div id="lobby-section" style="display:none;" class="main-content">
         <div class="card profile-card">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div id="nick-display-area" style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <span style="font-size:0.7rem; color:var(--text-dim); display:block;">Warrior</span>
-              <span id="displayNick" style="font-family:'Cinzel'; color:var(--gold); font-size:1.3rem; font-weight:bold;">-</span>
+              <span style="font-size:0.75rem; color:var(--text-dim); display:block; margin-bottom:4px;">Current Warrior</span>
+              <span id="displayNick" style="font-family:'Cinzel'; color:var(--gold); font-size:1.5rem; font-weight:bold;">-</span>
             </div>
-            <span style="color:var(--fire-orange); cursor:pointer; font-weight:bold; font-size:0.8rem;" onclick="toggleChangeNick()">RENAME</span>
+            <button onclick="toggleChangeNick()" style="background:transparent; color:var(--fire-orange); font-size:0.8rem; border: 1px solid var(--fire-orange); padding: 4px 8px; border-radius: 4px;">RENAME</button>
           </div>
+          
           <div id="nick-change-box" style="display:none; margin-top:15px;">
-            <input type="text" id="newNickInput" placeholder="NEW NAME" maxlength="12" />
+            <input type="text" id="newNickInput" placeholder="NEW NAME" maxlength="12" style="padding: 8px;" />
             <div class="btn-group">
-              <button class="primary-btn" onclick="applyNewNick()">CONFIRM</button>
-              <button onclick="toggleChangeNick()" style="background:#444; color:white;">CANCEL</button>
+              <button class="primary-btn" onclick="applyNewNick()" style="height:35px; font-size:0.75rem;">CONFIRM</button>
+              <button onclick="toggleChangeNick()" class="leave-btn" style="height:35px; font-size:0.75rem;">CANCEL</button>
             </div>
           </div>
         </div>
 
-        <div class="card arena-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
             <span class="guide-title" style="margin:0">ACTIVE DUELS</span>
-            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:8px 20px; font-size:0.8rem;">+ NEW DUEL</button>
+            <button id="createRoomBtn" class="primary-btn" style="width:auto; padding:10px 25px; font-size:0.85rem;">+ NEW DUEL</button>
           </div>
           <div id="roomContainer"></div>
         </div>
@@ -136,7 +140,7 @@
 </div>
 
 <script>
-  // 1. Firebase 설정 및 초기화
+  // --- 1. FIREBASE INITIALIZATION ---
   const firebaseConfig = { 
     apiKey: "AIzaSyDRJfE456ai9hstEkxyfzE4DTrTq9sutCo", 
     authDomain: "gibraltar-live.firebaseapp.com", 
@@ -150,7 +154,7 @@
   if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
   const db = firebase.database();
 
-  // 2. 사운드 엔진
+  // --- 2. AUDIO ENGINE ---
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -162,7 +166,7 @@
     else if (type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
   }
 
-  // 3. 앱 로직
+  // --- 3. APP LOGIC ---
   const getNick = () => localStorage.getItem('nickname');
   let currentRoomId = null;
   let lastBattleCount = 0;
@@ -198,25 +202,37 @@
       const isInBattle = room.status === 'BATTLE';
       const myRole = (p1 === nick) ? 'p1' : (p2 === nick ? 'p2' : null);
       const amIReady = (myRole === 'p1' ? room.p1Ready : room.p2Ready);
-      const getSlotClass = (player, ready) => (player === 'EMPTY' ? 'slot-empty' : (ready ? 'slot-ready' : 'slot-occupied'));
+
+      const getSlotClass = (player, ready) => {
+        if (player === 'EMPTY') return 'slot-empty';
+        return ready ? 'slot-ready' : 'slot-occupied';
+      };
 
       const div = document.createElement('div');
       div.className = `pvp-room ${isInBattle ? 'battle-active' : ''}`;
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--gold); font-family:'Cinzel'">
+        <div style="display:flex; justify-content:space-between; font-family:'Cinzel'; font-size:0.75rem; color:var(--gold);">
           <span>#${id.slice(-4)}</span><span>${isInBattle ? '⚔️ COMBAT' : '🛡️ WAITING'}</span>
         </div>
         <div class="pvp-slots">
-          <div class="pvp-player ${getSlotClass(p1, room.p1Ready)}" onclick="tryJoin('${id}', 'p1')">${p1}</div>
-          <div class="vs-text">VS</div>
-          <div class="pvp-player ${getSlotClass(p2, room.p2Ready)}" onclick="tryJoin('${id}', 'p2')">${p2}</div>
-        </div>
-        <div class="btn-container">
-          <div class="btn-group">
-            ${(myRole && !isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? `<button class="start-btn" onclick="toggleReady('${id}', '${myRole}')" style="background:var(--gold); color:#000;">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
-            ${myRole ? `<button onclick="leaveRoom('${id}')" style="background:#444; color:#fff;">RETREAT</button>` : ''}
+          <div class="pvp-player ${getSlotClass(p1, room.p1Ready)}" onclick="tryJoin('${id}', 'p1')">
+            <span class="player-name">${p1}</span>
           </div>
-        </div>`;
+          <div class="vs-text">VS</div>
+          <div class="pvp-player ${getSlotClass(p2, room.p2Ready)}" onclick="tryJoin('${id}', 'p2')">
+            <span class="player-name">${p2}</span>
+          </div>
+        </div>
+        <div class="action-area">
+          ${myRole ? `
+            <div class="btn-group">
+              ${(!isInBattle && p1 !== 'EMPTY' && p2 !== 'EMPTY') ? 
+                `<button class="primary-btn" onclick="toggleReady('${id}', '${myRole}')" style="${amIReady ? 'background:var(--gold); color:#000;' : ''}">${amIReady ? 'CANCEL' : 'READY'}</button>` : ''}
+              <button class="leave-btn" onclick="leaveRoom('${id}')">RETREAT</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
       container.appendChild(div);
     });
 
@@ -257,11 +273,48 @@
     });
   };
 
-  window.leaveRoom = (rid) => { playSound('click'); db.ref('rooms/'+rid).transaction(r => { if(r) { if(r.p1===getNick()) {r.p1='EMPTY'; r.p1Ready=false;} else {r.p2='EMPTY'; r.p2Ready=false;} if(r.p1==='EMPTY' && r.p2==='EMPTY') return null; r.status='WAITING'; r.lastUpdate=Date.now(); } return r; }); };
-  document.getElementById('createRoomBtn').onclick = () => { playSound('click'); db.ref('rooms/room_'+Date.now()).set({ p1: getNick(), p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() }); };
-  document.getElementById('registerBtn').onclick = () => { playSound('click'); const v = document.getElementById('avatarId').value.trim(); if(v) { localStorage.setItem('nickname', v); location.reload(); } };
-  window.toggleChangeNick = () => { const box = document.getElementById('nick-change-box'); box.style.display = box.style.display === 'none' ? 'block' : 'none'; };
-  window.applyNewNick = () => { const n = document.getElementById('newNickInput').value.trim(); if(n) { localStorage.setItem('nickname', n); location.reload(); } };
+  window.leaveRoom = (rid) => { 
+    playSound('click'); 
+    db.ref('rooms/'+rid).transaction(r => { 
+      if(r) { 
+        if(r.p1===getNick()) {r.p1='EMPTY'; r.p1Ready=false;} 
+        else {r.p2='EMPTY'; r.p2Ready=false;} 
+        if(r.p1==='EMPTY' && r.p2==='EMPTY') return null; 
+        r.status='WAITING'; r.lastUpdate=Date.now(); 
+      } return r; 
+    }); 
+  };
+
+  document.getElementById('createRoomBtn').onclick = () => { 
+    playSound('click'); 
+    db.ref('rooms/room_'+Date.now()).set({ 
+      p1: getNick(), p2: 'EMPTY', status: 'WAITING', p1Ready: false, p2Ready: false, lastUpdate: Date.now() 
+    }); 
+  };
+
+  document.getElementById('registerBtn').onclick = () => { 
+    playSound('click'); 
+    const v = document.getElementById('avatarId').value.trim(); 
+    if(v) { localStorage.setItem('nickname', v); location.reload(); } 
+  };
+
+  window.toggleChangeNick = () => { 
+    playSound('click');
+    const displayArea = document.getElementById('nick-display-area');
+    const changeBox = document.getElementById('nick-change-box');
+    if (changeBox.style.display === 'none') {
+      displayArea.style.display = 'none';
+      changeBox.style.display = 'block';
+    } else {
+      displayArea.style.display = 'flex';
+      changeBox.style.display = 'none';
+    }
+  };
+
+  window.applyNewNick = () => { 
+    const n = document.getElementById('newNickInput').value.trim(); 
+    if(n) { localStorage.setItem('nickname', n); location.reload(); } 
+  };
 </script>
 </body>
 </html>
